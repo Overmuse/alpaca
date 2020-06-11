@@ -1,58 +1,53 @@
-
-use http;
+use anyhow::{Result, anyhow};
+use log::{info, error};
+use reqwest::{Client, header::{HeaderMap, HeaderValue, HeaderName}, Url, Method};
 use serde::{Serialize, Deserialize};
-use serde_json;
 
 mod utils;
-use utils::from_str;
+pub mod account;
+pub mod orders;
+pub mod positions;
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum Side {
-    Buy,
-    Sell
+pub struct AlpacaConfig {
+    client: Client,
+    url: Url,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum OrderType {
-    Market,
-    Limit {
-        #[serde(deserialize_with = "from_str")]
-        limit_price: f64
-    },
-    Stop {
-        #[serde(deserialize_with = "from_str")]
-        stop_price: f64
-    },
-    StopLimit {
-        #[serde(deserialize_with = "from_str")]
-        limit_price: f64,
-        #[serde(deserialize_with = "from_str")]
-        stop_price: f64
+impl AlpacaConfig {
+    pub fn new(url: String, key_id: String, secret_key: String) -> Result<Self> {
+        let mut headers = HeaderMap::new();
+        headers.insert(HeaderName::from_lowercase(b"apca-api-key-id").unwrap(), HeaderValue::from_str(&key_id)?);
+        headers.insert(HeaderName::from_lowercase(b"apca-api-secret-key").unwrap(), HeaderValue::from_str(&secret_key)?);
+
+        let client = Client::builder()
+            .default_headers(headers.clone())
+            .build()?;
+
+        Ok(AlpacaConfig{ client, url: Url::parse(&url)? })
+    }
+}
+
+pub async fn alpaca_request(method: Method, endpoint: &str, config: AlpacaConfig) -> Result<String> {
+    let response = config.client.request(method, config.url.join(endpoint)?)
+        .send()
+        .await?;
+
+    if response.status().is_success() {
+        return Ok(response.text().await?)
+    } else {
+        Err(anyhow!("Non-successful status: {:?}", response.status()))
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-pub enum TimeInForce {
-    DAY,
-    GTC,
-    OPG,
-    CLS,
-    IOC,
-    FOK
+pub enum Side {
+    Buy,
+    Sell,
+    /// Only used for positions
+    Long
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AlpacaOrder {
-    pub symbol: String,
-    #[serde(deserialize_with = "from_str")]
-    pub qty: String,
-    pub side: Side,
-    #[serde(flatten)]
-    pub order_type: OrderType,
-    pub time_in_force: TimeInForce,
-    pub extended_hours: bool,
-    pub client_order_id: String,
+impl Default for Side {
+    fn default() -> Self { Side::Buy }
 }

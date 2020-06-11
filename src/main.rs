@@ -1,15 +1,16 @@
-
-use trader::{AlpacaOrder, Side, OrderType, TimeInForce};
+use std::env;
+use tokio::runtime::Runtime;
+use alpaca::{AlpacaConfig, account::get_account, orders::get_orders, positions::close_positions};
 
 fn main() {
-    let a = AlpacaOrder{
-        symbol: "AAPL".to_string(),
-        qty: "1".to_string(),
-        side: Side::Buy,
-        order_type: OrderType::Market,
-        time_in_force: TimeInForce::GTC,
-        extended_hours: false,
-        client_order_id: "A".to_string()        
-    };
-    println!("{:?}", serde_json::to_string(&a));
+    let config = AlpacaConfig::new(
+        "https://paper-api.alpaca.markets".to_string(),
+        env::var("ALPACA_KEY_ID").unwrap(),
+        env::var("ALPACA_SECRET_KEY").unwrap()
+    ).unwrap();
+
+    let mut runtime = Runtime::new().unwrap();
+
+    println!("{:?}", runtime.block_on(close_positions(config))); 
 }
+
