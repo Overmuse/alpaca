@@ -2,13 +2,12 @@ use anyhow::Result;
 use reqwest::Method;
 use serde::{Serialize, Deserialize};
 use serde_json;
-use std::env;
 
 use crate::utils::from_str;
 use crate::{AlpacaConfig, Side, alpaca_request};
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "order_type", rename_all = "snake_case")]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum OrderType {
     Market,
     Limit {
@@ -77,7 +76,7 @@ pub struct AlpacaOrder {
     #[serde(deserialize_with = "from_str")]
     pub qty: u32,
     pub side: Side,
-    #[serde(flatten)]
+    #[serde(flatten, rename(serialize = "type"))]
     pub order_type: OrderType,
     pub time_in_force: TimeInForce,
     pub extended_hours: bool,
@@ -106,7 +105,37 @@ impl AlpacaOrder {
 }
 
 pub async fn get_orders(config: AlpacaConfig) -> Result<Vec<AlpacaOrder>> {
-   let res = alpaca_request(Method::GET, "v2/orders", config).await?;
+   let res = alpaca_request(Method::GET, "v2/orders", config, None::<AlpacaOrder>).await?;
    let orders: Vec<AlpacaOrder> = serde_json::from_str(&res)?;
    Ok(orders)
+}
+
+pub async fn get_order(config: AlpacaConfig, order_id: &str) -> Result<AlpacaOrder> {
+   let res = alpaca_request(Method::GET, &format!("v2/orders/{}", order_id), config, None::<AlpacaOrder>).await?;
+   let order: AlpacaOrder = serde_json::from_str(&res)?;
+   Ok(order)
+
+}
+
+pub async fn submit_order(config: AlpacaConfig, order: &AlpacaOrder) -> Result<AlpacaOrder> {
+    let res = alpaca_request(Method::POST, "v2/orders", config, Some(order)).await?;
+    let order = serde_json::from_str(&res)?;
+    Ok(order)
+}
+pub async fn replace_order(config: AlpacaConfig, order_id: &str, order: &AlpacaOrder) -> Result<AlpacaOrder> {
+    let res = alpaca_request(Method::PATCH, &format!("v2/orders/{}", order_id), config, Some(order)).await?;
+    let order = serde_json::from_str(&res)?;
+    Ok(order)
+}
+
+pub async fn cancel_order(config: AlpacaConfig, order_id: &str) -> Result<AlpacaOrder> {
+   let res = alpaca_request(Method::DELETE, &format!("v2/orders/{}", order_id), config, None::<AlpacaOrder>).await?;
+   let order: AlpacaOrder = serde_json::from_str(&res)?;
+   Ok(order)
+}
+
+pub async fn cancel_all_orders(config: AlpacaConfig) -> Result<Vec<AlpacaOrder>> {
+   let res = alpaca_request(Method::DELETE, "v2/orders", config, None::<AlpacaOrder>).await?;
+   let order: Vec<AlpacaOrder> = serde_json::from_str(&res)?;
+   Ok(order)
 }

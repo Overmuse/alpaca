@@ -1,5 +1,5 @@
 use anyhow::{Result, anyhow};
-use log::{info, error};
+//use log::{info, error};
 use reqwest::{Client, header::{HeaderMap, HeaderValue, HeaderName}, Url, Method};
 use serde::{Serialize, Deserialize};
 
@@ -7,6 +7,7 @@ mod utils;
 pub mod account;
 pub mod orders;
 pub mod positions;
+pub mod assets;
 
 pub struct AlpacaConfig {
     client: Client,
@@ -27,15 +28,17 @@ impl AlpacaConfig {
     }
 }
 
-pub async fn alpaca_request(method: Method, endpoint: &str, config: AlpacaConfig) -> Result<String> {
+pub async fn alpaca_request<T>(method: Method, endpoint: &str, config: AlpacaConfig, body: Option<T>) -> Result<String>
+    where T: Serialize {
     let response = config.client.request(method, config.url.join(endpoint)?)
+        .json(&body)
         .send()
         .await?;
 
     if response.status().is_success() {
         return Ok(response.text().await?)
     } else {
-        Err(anyhow!("Non-successful status: {:?}", response.status()))
+        Err(anyhow!("Non-successful status: {:?}, {:?}", response.status(), response.text().await?))
     }
 }
 

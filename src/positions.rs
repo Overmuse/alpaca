@@ -2,7 +2,6 @@ use anyhow::Result;
 use reqwest::Method;
 use serde::{Serialize, Deserialize};
 use serde_json;
-use std::env;
 use uuid::Uuid;
 
 use crate::utils::from_str;
@@ -40,26 +39,25 @@ pub struct AlpacaPosition {
 }
 
 pub async fn get_positions(config: AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
-   let res = alpaca_request(Method::GET, "v2/positions", config).await?;
+   let res = alpaca_request(Method::GET, "v2/positions", config, None::<AlpacaPosition>).await?;
    let positions: Vec<AlpacaPosition> = serde_json::from_str(&res)?;
    Ok(positions)
 }
 
 pub async fn get_position(config: AlpacaConfig, position: &str) -> Result<AlpacaPosition> {
-   let res = alpaca_request(Method::GET, &format!("v2/positions/{}", position), config).await?;
+   let res = alpaca_request(Method::GET, &format!("v2/positions/{}", position), config, None::<AlpacaPosition>).await?;
    let position: AlpacaPosition = serde_json::from_str(&res)?;
    Ok(position)
 }
 
-// TODO: Fix return type
-pub async fn close_positions(config: AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
-   let res = alpaca_request(Method::DELETE, "v2/positions", config).await?;
+pub async fn close_all_positions(config: AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
+   let res = alpaca_request(Method::DELETE, "v2/positions", config, None::<AlpacaPosition>).await?;
    let positions: Vec<AlpacaPosition> = serde_json::from_str(&res)?;
    Ok(positions)
 }
 
 pub async fn close_position(config: AlpacaConfig, position: &str) -> Result<AlpacaPosition> {
-   let res = alpaca_request(Method::DELETE, &format!("v2/positions/{}", position), config).await?;
+   let res = alpaca_request(Method::DELETE, &format!("v2/positions/{}", position), config, None::<AlpacaPosition>).await?;
    let position: AlpacaPosition = serde_json::from_str(&res)?;
    Ok(position)
 }
