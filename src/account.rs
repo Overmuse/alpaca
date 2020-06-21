@@ -59,7 +59,7 @@ pub struct AlpacaAccount {
     regt_buying_power: f64,
 }
 
-pub async fn get_account(config: AlpacaConfig) -> Result<AlpacaAccount> {
+pub async fn get_account(config: &AlpacaConfig) -> Result<AlpacaAccount> {
     let res = alpaca_request(Method::GET, "v2/account", config, None::<AlpacaAccount>).await?;
     let account = serde_json::from_str(&res)?;
     Ok(account)

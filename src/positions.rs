@@ -38,25 +38,25 @@ pub struct AlpacaPosition {
     pub change_today: f64,
 }
 
-pub async fn get_positions(config: AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
+pub async fn get_positions(config: &AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
    let res = alpaca_request(Method::GET, "v2/positions", config, None::<AlpacaPosition>).await?;
    let positions: Vec<AlpacaPosition> = serde_json::from_str(&res)?;
    Ok(positions)
 }
 
-pub async fn get_position(config: AlpacaConfig, position: &str) -> Result<AlpacaPosition> {
+pub async fn get_position(config: &AlpacaConfig, position: &str) -> Result<AlpacaPosition> {
    let res = alpaca_request(Method::GET, &format!("v2/positions/{}", position), config, None::<AlpacaPosition>).await?;
    let position: AlpacaPosition = serde_json::from_str(&res)?;
    Ok(position)
 }
 
-pub async fn close_all_positions(config: AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
+pub async fn close_all_positions(config: &AlpacaConfig) -> Result<Vec<AlpacaPosition>> {
    let res = alpaca_request(Method::DELETE, "v2/positions", config, None::<AlpacaPosition>).await?;
    let positions: Vec<AlpacaPosition> = serde_json::from_str(&res)?;
    Ok(positions)
 }
 
-pub async fn close_position(config: AlpacaConfig, position: &str) -> Result<AlpacaPosition> {
+pub async fn close_position(config: &AlpacaConfig, position: &str) -> Result<AlpacaPosition> {
    let res = alpaca_request(Method::DELETE, &format!("v2/positions/{}", position), config, None::<AlpacaPosition>).await?;
    let position: AlpacaPosition = serde_json::from_str(&res)?;
    Ok(position)

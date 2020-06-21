@@ -18,6 +18,6 @@ async fn main() {
         extended_hours: false,
         client_order_id: Some("BOOGALOO2".to_string())
     };
-    println!("{:?}", get_asset(config, "AAPL").await); 
+    println!("{:?}", get_asset(&config, "AAPL").await); 
 }
 

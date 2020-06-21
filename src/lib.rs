@@ -28,7 +28,7 @@ impl AlpacaConfig {
     }
 }
 
-pub async fn alpaca_request<T>(method: Method, endpoint: &str, config: AlpacaConfig, body: Option<T>) -> Result<String>
+pub async fn alpaca_request<T>(method: Method, endpoint: &str, config: &AlpacaConfig, body: Option<T>) -> Result<String>
     where T: Serialize {
     let response = config.client.request(method, config.url.join(endpoint)?)
         .json(&body)
