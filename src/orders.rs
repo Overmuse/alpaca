@@ -3,7 +3,7 @@ use reqwest::Method;
 use serde::{Serialize, Deserialize};
 use serde_json;
 
-use crate::utils::from_str;
+use crate::utils::{from_str, to_string};
 use crate::{AlpacaConfig, Side, alpaca_request};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -11,17 +11,17 @@ use crate::{AlpacaConfig, Side, alpaca_request};
 pub enum OrderType {
     Market,
     Limit {
-        #[serde(deserialize_with = "from_str")]
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         limit_price: f64
     },
     Stop {
-        #[serde(deserialize_with = "from_str")]
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         stop_price: f64
     },
     StopLimit {
-        #[serde(deserialize_with = "from_str")]
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         limit_price: f64,
-        #[serde(deserialize_with = "from_str")]
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         stop_price: f64
     }
 }
@@ -45,35 +45,42 @@ impl Default for TimeInForce {
     fn default() -> Self { TimeInForce::DAY }
 }
 
-//#[derive(Serialize, Deserialize, Debug)]
-//pub struct TakeProfitSpec {
-//    pub limit_price: f32,
-//}
-//
-//#[derive(Serialize, Deserialize, Debug)]
-//pub struct StopLossSpec {
-//    pub stop_price: f32,
-//    pub limit_price: f32,
-//}
-//
-//#[derive(Serialize, Deserialize, Debug)]
-//#[serde(rename_all = "lowercase")]
-//pub enum OrderClass {
-//    Simple,
-//    Bracket {
-//        take_profit: TakeProfitSpec,
-//        stop_loss: StopLossSpec
-//    }
-//}
-//
-//impl Default for OrderClass {
-//    fn default() -> Self { OrderClass::Simple }
-//}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TakeProfitSpec {
+    pub limit_price: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct StopLossSpec {
+    pub stop_price: f32,
+    pub limit_price: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum OrderClass {
+    Simple,
+    Bracket {
+        take_profit: TakeProfitSpec,
+        stop_loss: StopLossSpec,
+    },
+    OCO {
+        take_ptofit: TakeProfitSpec,
+        stop_loss: StopLossSpec,
+    },
+    OTO {
+        stop_loss: StopLossSpec,
+    },
+}
+
+impl Default for OrderClass {
+    fn default() -> Self { OrderClass::Simple }
+}
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct AlpacaOrder {
     pub symbol: String,
-    #[serde(deserialize_with = "from_str")]
+    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
     pub qty: u32,
     pub side: Side,
     #[serde(flatten, rename(serialize = "type"))]
@@ -81,7 +88,8 @@ pub struct AlpacaOrder {
     pub time_in_force: TimeInForce,
     pub extended_hours: bool,
     pub client_order_id: Option<String>,
-    //pub order_class: OrderClass,
+    #[serde(flatten)]
+    pub order_class: OrderClass,
 }
 
 impl AlpacaOrder {
@@ -91,17 +99,6 @@ impl AlpacaOrder {
             ..Default::default()
         }
     }
-
-    //pub fn submit(&self) -> Result<reqwest::Response> {
-    //    let json_order = serde_json::to_string(self)?; 
-    //    println!("{:?}", &json_order);
-    //    let response = client.post("http://paper-api.alpaca.markets/v2/orders")
-    //        .header("APCA-API-KEY-ID", env::var("ALPACA_KEY_ID")?)
-    //        .header("APCA-API-SECRET-KEY", env::var("ALPACA_SECRET_KEY")?)
-    //        .body(json_order)
-    //        .send()?;
-    //    Ok(response)
-    //}
 }
 
 pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<AlpacaOrder>> {

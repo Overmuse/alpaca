@@ -1,4 +1,5 @@
 use anyhow::Result;
+use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Serialize, Deserialize};
 use serde_json;
@@ -8,7 +9,7 @@ use crate::{AlpacaConfig, alpaca_request};
 use crate::utils::from_str;
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AccountStatus {
     Onboarding,
     SubmissionFailed,
@@ -30,7 +31,7 @@ pub struct AlpacaAccount {
     trading_blocked: bool,
     transfers_blocked: bool,    
     account_blocked: bool,
-    created_at: String,
+    created_at: DateTime<Utc>,
     shorting_enabled: bool,
     #[serde(deserialize_with = "from_str")]
     long_market_value: f64,

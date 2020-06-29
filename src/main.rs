@@ -1,5 +1,5 @@
 use std::env;
-use alpaca::{AlpacaConfig, orders::*, positions::*, assets::*};
+use alpaca::{AlpacaConfig, orders::*, positions::*, assets::*, account::*};
 
 #[tokio::main]
 async fn main() {
@@ -9,15 +9,26 @@ async fn main() {
         env::var("ALPACA_SECRET_KEY").unwrap()
     ).unwrap();
 
-    let _o = AlpacaOrder {
+    let o = AlpacaOrder {
         symbol: "AAPL".to_string(),
         qty: 1,
         side: alpaca::Side::Buy,
         order_type: OrderType::Limit{ limit_price: 100.0 },
         time_in_force: TimeInForce::GTC,
         extended_hours: false,
-        client_order_id: Some("BOOGALOO2".to_string())
+        client_order_id: Some("BOOGALOO2".to_string()),
+        order_class: OrderClass::Bracket {
+            take_profit: TakeProfitSpec {
+                limit_price: 301.0
+            },
+            stop_loss: StopLossSpec {
+                stop_price: 299.0,
+                limit_price: 298.5,
+            },
+        }
     };
-    println!("{:?}", get_asset(&config, "AAPL").await); 
+    println!("{:?}", &o); 
+    println!("{:?}", &serde_json::to_string(&o));
+    println!("{:?}", get_account(&config).await);
 }
 
