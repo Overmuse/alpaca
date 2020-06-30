@@ -42,7 +42,7 @@ pub async fn alpaca_request<T>(method: Method, endpoint: &str, config: &AlpacaCo
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Side {
     Buy,

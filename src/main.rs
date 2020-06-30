@@ -9,14 +9,14 @@ async fn main() {
         env::var("ALPACA_SECRET_KEY").unwrap()
     ).unwrap();
 
-    let o = AlpacaOrder {
+    let o = OrderIntent {
         symbol: "AAPL".to_string(),
         qty: 1,
         side: alpaca::Side::Buy,
         order_type: OrderType::Limit{ limit_price: 100.0 },
         time_in_force: TimeInForce::GTC,
         extended_hours: false,
-        client_order_id: Some("BOOGALOO2".to_string()),
+        client_order_id: Some("TEST".to_string()),
         order_class: OrderClass::Bracket {
             take_profit: TakeProfitSpec {
                 limit_price: 301.0
@@ -27,8 +27,7 @@ async fn main() {
             },
         }
     };
-    println!("{:?}", &o); 
-    println!("{:?}", &serde_json::to_string(&o));
-    println!("{:?}", get_account(&config).await);
+    //println!("{:#?}", &o);
+    //println!("{:#?}", &serde_json::to_string(&o).unwrap());
+    println!("{:#?}", get_orders(&config).await.unwrap());
 }
-
