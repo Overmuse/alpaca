@@ -30,7 +30,7 @@ pub enum Status {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct AlpacaAsset {
+pub struct Asset {
     id: Uuid,
     class: AssetClass,
     exchange: Exchange,
@@ -42,14 +42,14 @@ pub struct AlpacaAsset {
     easy_to_borrow: bool,
 }
 
-pub async fn get_assets(config: &AlpacaConfig) -> Result<Vec<AlpacaAsset>> {
-   let res = alpaca_request(Method::GET, "v2/assets", config, None::<AlpacaAsset>).await?;
-   let assets: Vec<AlpacaAsset> = serde_json::from_str(&res)?;
+pub async fn get_assets(config: &AlpacaConfig) -> Result<Vec<Asset>> {
+   let res = alpaca_request(Method::GET, "v2/assets", config, None::<Asset>).await?;
+   let assets: Vec<Asset> = serde_json::from_str(&res)?;
    Ok(assets)
 }
 
-pub async fn get_asset(config: &AlpacaConfig, symbol: &str) -> Result<AlpacaAsset>{
-   let res = alpaca_request(Method::GET, &format!("v2/assets/{}", symbol), config, None::<AlpacaAsset>).await?;
-   let assets: AlpacaAsset = serde_json::from_str(&res)?;
-   Ok(assets)
+pub async fn get_asset(config: &AlpacaConfig, symbol: &str) -> Result<Asset>{
+   let res = alpaca_request(Method::GET, &format!("v2/assets/{}", symbol), config, None::<Asset>).await?;
+   let asset: Asset = serde_json::from_str(&res)?;
+   Ok(asset)
 }

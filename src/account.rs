@@ -21,7 +21,7 @@ pub enum AccountStatus {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct AlpacaAccount {
+pub struct Account {
     id: Uuid,
     account_number: String,
     status: AccountStatus,
@@ -60,8 +60,8 @@ pub struct AlpacaAccount {
     regt_buying_power: f64,
 }
 
-pub async fn get_account(config: &AlpacaConfig) -> Result<AlpacaAccount> {
-    let res = alpaca_request(Method::GET, "v2/account", config, None::<AlpacaAccount>).await?;
+pub async fn get_account(config: &AlpacaConfig) -> Result<Account> {
+    let res = alpaca_request(Method::GET, "v2/account", config, None::<Account>).await?;
     let account = serde_json::from_str(&res)?;
     Ok(account)
 }
