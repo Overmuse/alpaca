@@ -1,11 +1,11 @@
 use anyhow::Result;
 use reqwest::Method;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
 
 use crate::utils::from_str;
-use crate::{AlpacaConfig, Side, alpaca_request};
+use crate::{alpaca_request, AlpacaConfig, Side};
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Position {
@@ -39,25 +39,37 @@ pub struct Position {
 }
 
 pub async fn get_positions(config: &AlpacaConfig) -> Result<Vec<Position>> {
-   let res = alpaca_request(Method::GET, "v2/positions", config, None::<Position>).await?;
-   let positions: Vec<Position> = serde_json::from_str(&res)?;
-   Ok(positions)
+    let res = alpaca_request(Method::GET, "v2/positions", config, None::<Position>).await?;
+    let positions: Vec<Position> = serde_json::from_str(&res)?;
+    Ok(positions)
 }
 
 pub async fn get_position(config: &AlpacaConfig, position: &str) -> Result<Position> {
-   let res = alpaca_request(Method::GET, &format!("v2/positions/{}", position), config, None::<Position>).await?;
-   let position: Position = serde_json::from_str(&res)?;
-   Ok(position)
+    let res = alpaca_request(
+        Method::GET,
+        &format!("v2/positions/{}", position),
+        config,
+        None::<Position>,
+    )
+    .await?;
+    let position: Position = serde_json::from_str(&res)?;
+    Ok(position)
 }
 
 pub async fn close_all_positions(config: &AlpacaConfig) -> Result<Vec<Position>> {
-   let res = alpaca_request(Method::DELETE, "v2/positions", config, None::<Position>).await?;
-   let positions: Vec<Position> = serde_json::from_str(&res)?;
-   Ok(positions)
+    let res = alpaca_request(Method::DELETE, "v2/positions", config, None::<Position>).await?;
+    let positions: Vec<Position> = serde_json::from_str(&res)?;
+    Ok(positions)
 }
 
 pub async fn close_position(config: &AlpacaConfig, position: &str) -> Result<Position> {
-   let res = alpaca_request(Method::DELETE, &format!("v2/positions/{}", position), config, None::<Position>).await?;
-   let position: Position = serde_json::from_str(&res)?;
-   Ok(position)
+    let res = alpaca_request(
+        Method::DELETE,
+        &format!("v2/positions/{}", position),
+        config,
+        None::<Position>,
+    )
+    .await?;
+    let position: Position = serde_json::from_str(&res)?;
+    Ok(position)
 }

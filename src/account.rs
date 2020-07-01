@@ -1,12 +1,12 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use reqwest::Method;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
 
-use crate::{AlpacaConfig, alpaca_request};
 use crate::utils::from_str;
+use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -17,7 +17,7 @@ pub enum AccountStatus {
     AccountUpdate,
     ApprovalPending,
     Active,
-    Rejected
+    Rejected,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -29,7 +29,7 @@ pub struct Account {
     pattern_day_trader: bool,
     trade_suspended_by_user: bool,
     trading_blocked: bool,
-    transfers_blocked: bool,    
+    transfers_blocked: bool,
     account_blocked: bool,
     created_at: DateTime<Utc>,
     shorting_enabled: bool,

@@ -1,12 +1,12 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use reqwest::Method;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
 
 use crate::utils::*;
-use crate::{AlpacaConfig, Side, alpaca_request};
+use crate::{alpaca_request, AlpacaConfig, Side};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -14,22 +14,24 @@ pub enum OrderType {
     Market,
     Limit {
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        limit_price: f64
+        limit_price: f64,
     },
     Stop {
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        stop_price: f64
+        stop_price: f64,
     },
     StopLimit {
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         limit_price: f64,
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        stop_price: f64
-    }
+        stop_price: f64,
+    },
 }
 
 impl Default for OrderType {
-    fn default() -> Self { OrderType::Market }
+    fn default() -> Self {
+        OrderType::Market
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -40,11 +42,13 @@ pub enum TimeInForce {
     OPG,
     CLS,
     IOC,
-    FOK
+    FOK,
 }
 
 impl Default for TimeInForce {
-    fn default() -> Self { TimeInForce::DAY }
+    fn default() -> Self {
+        TimeInForce::DAY
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -76,7 +80,9 @@ pub enum OrderClass {
 }
 
 impl Default for OrderClass {
-    fn default() -> Self { OrderClass::Simple }
+    fn default() -> Self {
+        OrderClass::Simple
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -154,24 +160,32 @@ pub struct Order {
     pub order_type: OrderType,
     pub side: Side,
     pub time_in_force: TimeInForce,
-    #[serde(deserialize_with = "from_str_optional", serialize_with = "to_string_optional")]
+    #[serde(
+        deserialize_with = "from_str_optional",
+        serialize_with = "to_string_optional"
+    )]
     pub filled_avg_price: Option<f64>,
     pub status: OrderStatus,
     pub extended_hours: bool,
-    pub legs: Option<Vec<Order>>
+    pub legs: Option<Vec<Order>>,
 }
 
 pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-   let res = alpaca_request(Method::GET, "v2/orders", config, None::<Order>).await?;
-   let orders: Vec<Order> = serde_json::from_str(&res)?;
-   Ok(orders)
+    let res = alpaca_request(Method::GET, "v2/orders", config, None::<Order>).await?;
+    let orders: Vec<Order> = serde_json::from_str(&res)?;
+    Ok(orders)
 }
 
 pub async fn get_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
-   let res = alpaca_request(Method::GET, &format!("v2/orders/{}", order_id), config, None::<Order>).await?;
-   let order: Order = serde_json::from_str(&res)?;
-   Ok(order)
-
+    let res = alpaca_request(
+        Method::GET,
+        &format!("v2/orders/{}", order_id),
+        config,
+        None::<Order>,
+    )
+    .await?;
+    let order: Order = serde_json::from_str(&res)?;
+    Ok(order)
 }
 
 pub async fn submit_order(config: &AlpacaConfig, order: &OrderIntent) -> Result<Order> {
@@ -179,22 +193,38 @@ pub async fn submit_order(config: &AlpacaConfig, order: &OrderIntent) -> Result<
     let order = serde_json::from_str(&res)?;
     Ok(order)
 }
-pub async fn replace_order(config: &AlpacaConfig, order_id: &str, order: &OrderIntent) -> Result<Order> {
-    let res = alpaca_request(Method::PATCH, &format!("v2/orders/{}", order_id), config, Some(order)).await?;
+pub async fn replace_order(
+    config: &AlpacaConfig,
+    order_id: &str,
+    order: &OrderIntent,
+) -> Result<Order> {
+    let res = alpaca_request(
+        Method::PATCH,
+        &format!("v2/orders/{}", order_id),
+        config,
+        Some(order),
+    )
+    .await?;
     let order = serde_json::from_str(&res)?;
     Ok(order)
 }
 
 pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
-   let res = alpaca_request(Method::DELETE, &format!("v2/orders/{}", order_id), config, None::<Order>).await?;
-   let order: Order = serde_json::from_str(&res)?;
-   Ok(order)
+    let res = alpaca_request(
+        Method::DELETE,
+        &format!("v2/orders/{}", order_id),
+        config,
+        None::<Order>,
+    )
+    .await?;
+    let order: Order = serde_json::from_str(&res)?;
+    Ok(order)
 }
 
 pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-   let res = alpaca_request(Method::DELETE, "v2/orders", config, None::<Order>).await?;
-   let order: Vec<Order> = serde_json::from_str(&res)?;
-   Ok(order)
+    let res = alpaca_request(Method::DELETE, "v2/orders", config, None::<Order>).await?;
+    let order: Vec<Order> = serde_json::from_str(&res)?;
+    Ok(order)
 }
 
 #[cfg(test)]
@@ -222,7 +252,8 @@ mod tests {
                     }\
                 }\
             }\
-        }".into()
+        }"
+        .into()
     }
 
     fn get_order_intent() -> OrderIntent {
@@ -230,19 +261,17 @@ mod tests {
             symbol: "AAPL".to_string(),
             qty: 1,
             side: Side::Buy,
-            order_type: OrderType::Limit{ limit_price: 100.0 },
+            order_type: OrderType::Limit { limit_price: 100.0 },
             time_in_force: TimeInForce::GTC,
             extended_hours: false,
             client_order_id: Some("TEST".to_string()),
             order_class: OrderClass::Bracket {
-                take_profit: TakeProfitSpec {
-                    limit_price: 301.0
-                },
+                take_profit: TakeProfitSpec { limit_price: 301.0 },
                 stop_loss: StopLossSpec {
                     stop_price: 299.0,
                     limit_price: 298.5,
                 },
-            }
+            },
         }
     }
 
@@ -257,9 +286,6 @@ mod tests {
     #[test]
     fn deserialize() {
         let oi: OrderIntent = serde_json::from_str(&oi_str()).unwrap();
-        assert_eq!(
-            oi,
-            get_order_intent(),
-        )
+        assert_eq!(oi, get_order_intent(),)
     }
 }
