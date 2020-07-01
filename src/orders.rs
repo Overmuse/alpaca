@@ -133,6 +133,41 @@ impl OrderIntent {
             ..Default::default()
         }
     }
+
+    pub fn qty(mut self, qty: u32) -> Self {
+        self.qty = qty;
+        self
+    }
+
+    pub fn side(mut self, side: Side) -> Self {
+        self.side = side;
+        self
+    }
+
+    pub fn order_type(mut self, order_type: OrderType) -> Self {
+        self.order_type = order_type;
+        self
+    }
+
+    pub fn time_in_force(mut self, time_in_force: TimeInForce) -> Self {
+        self.time_in_force = time_in_force;
+        self
+    }
+
+    pub fn extended_hours(mut self, extended_hours: bool) -> Self {
+        self.extended_hours = extended_hours;
+        self
+    }
+
+    pub fn client_order_id(mut self, client_order_id: String) -> Self {
+        self.client_order_id = Some(client_order_id);
+        self
+    }
+
+    pub fn order_class(mut self, order_class: OrderClass) -> Self {
+        self.order_class = order_class;
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
