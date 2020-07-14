@@ -16,7 +16,7 @@ pub struct Position {
     #[serde(deserialize_with = "from_str")]
     pub avg_entry_price: f64,
     #[serde(deserialize_with = "from_str")]
-    pub qty: u32,
+    pub qty: i32,
     pub side: Side,
     #[serde(deserialize_with = "from_str")]
     pub market_value: f64,

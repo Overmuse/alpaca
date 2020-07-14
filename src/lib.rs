@@ -72,6 +72,7 @@ pub enum Side {
     Sell,
     /// Only used for positions
     Long,
+    Short,
 }
 
 impl Default for Side {
