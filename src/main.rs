@@ -28,6 +28,6 @@ async fn main() {
     };
     //println!("{:#?}", &o);
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
-    //println!("{:#?}", get_orders(&config).await.unwrap());
-    println!("{:#?}", get_positions(&config).await.unwrap());
+    println!("{:#?}", get_orders(&config).await.unwrap());
+    //println!("{:#?}", get_positions(&config).await.unwrap());
 }
