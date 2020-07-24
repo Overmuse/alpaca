@@ -21,7 +21,7 @@ pub enum AlpacaAction {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "event")]
+#[serde(tag = "event", rename_all = "snake_case")]
 pub enum Event {
     Calculated,
     Canceled {
