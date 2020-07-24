@@ -10,6 +10,7 @@ pub mod account;
 pub mod assets;
 pub mod orders;
 pub mod positions;
+pub mod stream;
 mod utils;
 
 pub struct AlpacaConfig {
