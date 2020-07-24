@@ -65,8 +65,8 @@ pub enum Event {
 #[serde(rename_all = "snake_case")]
 pub struct OrderEvent {
     #[serde(flatten)]
-    event: Event,
-    order: Order,
+    pub event: Event,
+    pub order: Order,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
