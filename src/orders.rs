@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::utils::*;
 use crate::{alpaca_request, AlpacaConfig, Side};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum OrderType {
     Market,
@@ -34,7 +34,7 @@ impl Default for OrderType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum TimeInForce {
     DAY,
@@ -51,18 +51,18 @@ impl Default for TimeInForce {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct TakeProfitSpec {
     pub limit_price: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct StopLossSpec {
     pub stop_price: f32,
     pub limit_price: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum OrderClass {
     Simple,
@@ -85,7 +85,7 @@ impl Default for OrderClass {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum OrderStatus {
     Accepted,
@@ -112,7 +112,7 @@ impl Default for OrderStatus {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone)]
 pub struct OrderIntent {
     pub symbol: String,
     #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
@@ -170,7 +170,7 @@ impl OrderIntent {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Order {
     pub id: Uuid,
     pub client_order_id: Option<String>,
