@@ -7,7 +7,7 @@ use reqwest::{
 use serde::{Deserialize, Serialize};
 
 pub mod account;
-pub mod account_activities;
+//pub mod account_activities;
 pub mod assets;
 pub mod orders;
 pub mod positions;

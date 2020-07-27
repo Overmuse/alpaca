@@ -1,4 +1,4 @@
-use alpaca::{account::*, assets::*, orders::*, positions::*, AlpacaConfig};
+use alpaca::{account::*, account_activities::*, assets::*, orders::*, positions::*, AlpacaConfig};
 use std::env;
 
 #[tokio::main]
@@ -28,6 +28,6 @@ async fn main() {
     };
     //println!("{:#?}", &o);
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
-    println!("{:#?}", get_orders(&config).await.unwrap());
+    println!("{:#?}", get_account_activities(&config).await.unwrap());
     //println!("{:#?}", get_positions(&config).await.unwrap());
 }
