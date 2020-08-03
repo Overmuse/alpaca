@@ -1,14 +1,14 @@
 use alpaca::{account::*, account_activities::*, assets::*, orders::*, positions::*, AlpacaConfig};
+use env_logger;
+use log::{info, error};
 use std::env;
 
-#[tokio::main]
-async fn main() {
+async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let config = AlpacaConfig::new(
         "https://paper-api.alpaca.markets".to_string(),
-        env::var("ALPACA_KEY_ID").unwrap(),
-        env::var("ALPACA_SECRET_KEY").unwrap(),
-    )
-    .unwrap();
+        env::var("ALPACA_KEY_ID")?,
+        env::var("ALPACA_SECRET_KEY")?,
+    )?;
 
     let o = OrderIntent {
         symbol: "AAPL".to_string(),
@@ -30,4 +30,15 @@ async fn main() {
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
     println!("{:#?}", get_account_activities(&config).await.unwrap());
     //println!("{:#?}", get_positions(&config).await.unwrap());
+    Ok(())
+}
+
+fn main() {
+    let mut rt = tokio::runtime::Runtime::new().unwrap();   
+    env_logger::init();
+
+    match rt.block_on(run()) {
+        Ok(()) => info!("All done!"),
+        Err(e) => error!("Received error: {:?}", e)
+    }
 }

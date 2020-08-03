@@ -7,7 +7,7 @@ use reqwest::{
 use serde::{Deserialize, Serialize};
 
 pub mod account;
-//pub mod account_activities;
+pub mod account_activities;
 pub mod assets;
 pub mod orders;
 pub mod positions;
@@ -68,10 +68,11 @@ where
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum Side {
     Buy,
     Sell,
+    SellShort,
     /// Only used for positions
     Long,
     Short,
