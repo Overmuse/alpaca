@@ -53,4 +53,4 @@ pub enum Activity {
         #[serde(deserialize_with = "from_str_optional", serialize_with = "to_string_optional")]
         per_share_amount: Option<f64>,
     }
-}
+} 
