@@ -1,6 +1,6 @@
 use alpaca::{account::*, account_activities::*, assets::*, orders::*, positions::*, AlpacaConfig};
 use env_logger;
-use log::{info, error};
+use log::{error, info};
 use std::env;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,11 +34,11 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();   
+    let mut rt = tokio::runtime::Runtime::new().unwrap();
     env_logger::init();
 
     match rt.block_on(run()) {
         Ok(()) => info!("All done!"),
-        Err(e) => error!("Received error: {:?}", e)
+        Err(e) => error!("Received error: {:?}", e),
     }
 }

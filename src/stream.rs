@@ -1,7 +1,7 @@
-use chrono::{DateTime, Utc};
 use crate::orders::Order;
-use serde::{Serialize, Deserialize};
 use crate::utils::from_str;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum AlpacaData {

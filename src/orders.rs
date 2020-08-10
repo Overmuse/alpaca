@@ -267,27 +267,27 @@ mod tests {
     use super::*;
 
     fn oi_str() -> String {
-        "{\
-            \"symbol\":\"AAPL\",\
-            \"qty\":\"1\",\
-            \"side\":\"buy\",\
-            \"type\":\"limit\",\
-            \"limit_price\":\"100\",\
-            \"time_in_force\":\"gtc\",\
-            \"extended_hours\":false,\
-            \"client_order_id\":\"TEST\",\
-            \"order_class\":{\
-                \"bracket\":{\
-                    \"take_profit\":{\
-                        \"limit_price\":301.0\
-                    },\
-                    \"stop_loss\":{\
-                        \"stop_price\":299.0,\
-                        \"limit_price\":298.5\
-                    }\
-                }\
-            }\
-        }"
+        r#"{
+            "symbol":"AAPL",
+            "qty":"1",
+            "side":"buy",
+            "type":"limit",
+            "limit_price":"100",
+            "time_in_force":"gtc",
+            "extended_hours":false,
+            "client_order_id":"TEST",
+            "order_class":{
+                "bracket":{
+                    "take_profit":{
+                        "limit_price":301.0
+                    },
+                    "stop_loss":{
+                        "stop_price":299.0,
+                        "limit_price":298.5
+                    }
+                }
+            }
+        }"#
         .into()
     }
 
@@ -314,13 +314,13 @@ mod tests {
     fn serialize() {
         assert_eq!(
             serde_json::to_string(&get_order_intent()).unwrap(),
-            oi_str(),
+            oi_str()
         )
     }
 
     #[test]
     fn deserialize() {
         let oi: OrderIntent = serde_json::from_str(&oi_str()).unwrap();
-        assert_eq!(oi, get_order_intent(),)
+        assert_eq!(oi, get_order_intent())
     }
 }
