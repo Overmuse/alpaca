@@ -6,8 +6,8 @@ use std::env;
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let config = AlpacaConfig::new(
         "https://paper-api.alpaca.markets".to_string(),
-        env::var("ALPACA_KEY_ID")?,
-        env::var("ALPACA_SECRET_KEY")?,
+        env::var("APCA_PAPER_KEY_ID")?,
+        env::var("APCA_PAPER_SECRET_KEY")?,
     )?;
 
     let o = OrderIntent {

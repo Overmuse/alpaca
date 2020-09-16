@@ -206,7 +206,7 @@ pub struct Order {
 }
 
 pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-    let res = alpaca_request(Method::GET, "v2/orders", config, None::<Order>).await?;
+    let res = alpaca_request(Method::GET, "/orders", config, None::<Order>).await?;
     let orders: Vec<Order> = serde_json::from_str(&res)?;
     Ok(orders)
 }
@@ -214,7 +214,7 @@ pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
 pub async fn get_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
     let res = alpaca_request(
         Method::GET,
-        &format!("v2/orders/{}", order_id),
+        &format!("/orders/{}", order_id),
         config,
         None::<Order>,
     )
@@ -224,7 +224,7 @@ pub async fn get_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
 }
 
 pub async fn submit_order(config: &AlpacaConfig, order: &OrderIntent) -> Result<Order> {
-    let res = alpaca_request(Method::POST, "v2/orders", config, Some(order)).await?;
+    let res = alpaca_request(Method::POST, "/orders", config, Some(order)).await?;
     let order = serde_json::from_str(&res)?;
     Ok(order)
 }
@@ -235,7 +235,7 @@ pub async fn replace_order(
 ) -> Result<Order> {
     let res = alpaca_request(
         Method::PATCH,
-        &format!("v2/orders/{}", order_id),
+        &format!("/orders/{}", order_id),
         config,
         Some(order),
     )
@@ -247,7 +247,7 @@ pub async fn replace_order(
 pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
     let res = alpaca_request(
         Method::DELETE,
-        &format!("v2/orders/{}", order_id),
+        &format!("/orders/{}", order_id),
         config,
         None::<Order>,
     )
@@ -257,7 +257,7 @@ pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<Order
 }
 
 pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-    let res = alpaca_request(Method::DELETE, "v2/orders", config, None::<Order>).await?;
+    let res = alpaca_request(Method::DELETE, "/orders", config, None::<Order>).await?;
     let order: Vec<Order> = serde_json::from_str(&res)?;
     Ok(order)
 }

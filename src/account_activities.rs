@@ -9,13 +9,7 @@ use crate::utils::*;
 use crate::{alpaca_request, AlpacaConfig, Side};
 
 pub async fn get_account_activities(config: &AlpacaConfig) -> Result<Vec<Activity>> {
-    let res = alpaca_request(
-        Method::GET,
-        "v2/account/activities",
-        config,
-        None::<Activity>,
-    )
-    .await?;
+    let res = alpaca_request(Method::GET, "/account/activities", config, None::<Activity>).await?;
     let result: Vec<Activity> = serde_json::from_str(&res)?;
     Ok(result)
 }
