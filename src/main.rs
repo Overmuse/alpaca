@@ -1,13 +1,16 @@
-use alpaca::{account::*, account_activities::*, assets::*, orders::*, positions::*, AlpacaConfig};
+use alpaca::{
+    account::*, account_activities::*, assets::*, calendar::*, orders::*, positions::*,
+    AlpacaConfig,
+};
 use env_logger;
 use log::{error, info};
 use std::env;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let config = AlpacaConfig::new(
-        "https://paper-api.alpaca.markets".to_string(),
-        env::var("APCA_PAPER_KEY_ID")?,
-        env::var("APCA_PAPER_SECRET_KEY")?,
+        "https://paper-api.alpaca.markets/v2/".to_string(),
+        env::var("APCA_API_KEY_ID")?,
+        env::var("APCA_API_SECRET_KEY")?,
     )?;
 
     let o = OrderIntent {
@@ -28,7 +31,8 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     };
     //println!("{:#?}", &o);
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
-    println!("{:#?}", get_account_activities(&config).await.unwrap());
+    //println!("{:#?}", get_account_activities(&config).await.unwrap());
+    println!("{:?}", get_calendar(&config).await.unwrap());
     //println!("{:#?}", get_positions(&config).await.unwrap());
     Ok(())
 }

@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 pub mod account;
 pub mod account_activities;
 pub mod assets;
+pub mod calendar;
+pub mod clock;
 pub mod orders;
 pub mod positions;
 pub mod stream;

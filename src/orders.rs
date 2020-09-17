@@ -206,7 +206,7 @@ pub struct Order {
 }
 
 pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-    let res = alpaca_request(Method::GET, "/orders", config, None::<Order>).await?;
+    let res = alpaca_request(Method::GET, "orders", config, None::<Order>).await?;
     let orders: Vec<Order> = serde_json::from_str(&res)?;
     Ok(orders)
 }
@@ -214,7 +214,7 @@ pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
 pub async fn get_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
     let res = alpaca_request(
         Method::GET,
-        &format!("/orders/{}", order_id),
+        &format!("orders/{}", order_id),
         config,
         None::<Order>,
     )
@@ -224,7 +224,7 @@ pub async fn get_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
 }
 
 pub async fn submit_order(config: &AlpacaConfig, order: &OrderIntent) -> Result<Order> {
-    let res = alpaca_request(Method::POST, "/orders", config, Some(order)).await?;
+    let res = alpaca_request(Method::POST, "orders", config, Some(order)).await?;
     let order = serde_json::from_str(&res)?;
     Ok(order)
 }
@@ -235,7 +235,7 @@ pub async fn replace_order(
 ) -> Result<Order> {
     let res = alpaca_request(
         Method::PATCH,
-        &format!("/orders/{}", order_id),
+        &format!("orders/{}", order_id),
         config,
         Some(order),
     )
@@ -247,7 +247,7 @@ pub async fn replace_order(
 pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
     let res = alpaca_request(
         Method::DELETE,
-        &format!("/orders/{}", order_id),
+        &format!("orders/{}", order_id),
         config,
         None::<Order>,
     )
@@ -257,7 +257,7 @@ pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<Order
 }
 
 pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-    let res = alpaca_request(Method::DELETE, "/orders", config, None::<Order>).await?;
+    let res = alpaca_request(Method::DELETE, "orders", config, None::<Order>).await?;
     let order: Vec<Order> = serde_json::from_str(&res)?;
     Ok(order)
 }
@@ -266,8 +266,9 @@ pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
 mod tests {
     use super::*;
 
-    fn oi_str() -> String {
-        r#"{
+    #[test]
+    fn serde() {
+        let json = r#"{
             "symbol":"AAPL",
             "qty":"1",
             "side":"buy",
@@ -287,40 +288,8 @@ mod tests {
                     }
                 }
             }
-        }"#
-        .into()
-    }
-
-    fn get_order_intent() -> OrderIntent {
-        OrderIntent {
-            symbol: "AAPL".to_string(),
-            qty: 1,
-            side: Side::Buy,
-            order_type: OrderType::Limit { limit_price: 100.0 },
-            time_in_force: TimeInForce::GTC,
-            extended_hours: false,
-            client_order_id: Some("TEST".to_string()),
-            order_class: OrderClass::Bracket {
-                take_profit: TakeProfitSpec { limit_price: 301.0 },
-                stop_loss: StopLossSpec {
-                    stop_price: 299.0,
-                    limit_price: 298.5,
-                },
-            },
-        }
-    }
-
-    #[test]
-    fn serialize() {
-        assert_eq!(
-            serde_json::to_string(&get_order_intent()).unwrap(),
-            oi_str()
-        )
-    }
-
-    #[test]
-    fn deserialize() {
-        let oi: OrderIntent = serde_json::from_str(&oi_str()).unwrap();
-        assert_eq!(oi, get_order_intent())
+        }"#;
+        let deserialized: OrderIntent = serde_json::from_str(json).unwrap();
+        let _serialized = serde_json::to_string(&deserialized).unwrap();
     }
 }

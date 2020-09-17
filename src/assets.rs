@@ -43,7 +43,7 @@ pub struct Asset {
 }
 
 pub async fn get_assets(config: &AlpacaConfig) -> Result<Vec<Asset>> {
-    let res = alpaca_request(Method::GET, "/assets", config, None::<Asset>).await?;
+    let res = alpaca_request(Method::GET, "assets", config, None::<Asset>).await?;
     let assets: Vec<Asset> = serde_json::from_str(&res)?;
     Ok(assets)
 }
@@ -51,7 +51,7 @@ pub async fn get_assets(config: &AlpacaConfig) -> Result<Vec<Asset>> {
 pub async fn get_asset(config: &AlpacaConfig, symbol: &str) -> Result<Asset> {
     let res = alpaca_request(
         Method::GET,
-        &format!("/assets/{}", symbol),
+        &format!("assets/{}", symbol),
         config,
         None::<Asset>,
     )

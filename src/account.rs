@@ -61,7 +61,7 @@ pub struct Account {
 }
 
 pub async fn get_account(config: &AlpacaConfig) -> Result<Account> {
-    let res = alpaca_request(Method::GET, "/account", config, None::<Account>).await?;
+    let res = alpaca_request(Method::GET, "account", config, None::<Account>).await?;
     let account = serde_json::from_str(&res)?;
     Ok(account)
 }
