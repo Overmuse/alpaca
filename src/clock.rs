@@ -8,10 +8,10 @@ use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Clock {
-    timestamp: DateTime<Utc>,
-    is_open: bool,
-    next_open: DateTime<Utc>,
-    next_close: DateTime<Utc>,
+    pub timestamp: DateTime<Utc>,
+    pub is_open: bool,
+    pub next_open: DateTime<Utc>,
+    pub next_close: DateTime<Utc>,
 }
 
 pub async fn get_clock(config: &AlpacaConfig) -> Result<Clock> {

@@ -9,11 +9,11 @@ use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Calendar {
-    date: NaiveDate,
+    pub date: NaiveDate,
     #[serde(deserialize_with = "hm_from_str", serialize_with = "hm_to_string")]
-    open: NaiveTime,
+    pub open: NaiveTime,
     #[serde(deserialize_with = "hm_from_str", serialize_with = "hm_to_string")]
-    close: NaiveTime,
+    pub close: NaiveTime,
 }
 
 pub async fn get_calendar(config: &AlpacaConfig) -> Result<Vec<Calendar>> {
