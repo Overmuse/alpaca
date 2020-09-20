@@ -17,12 +17,19 @@ pub mod positions;
 pub mod stream;
 mod utils;
 
+/// The main client used for making request to Alpaca.
+///
+/// `AlpacaConfig` stores an async Reqwest client as well as the associate 
+/// base url for the Alpaca server.
 pub struct AlpacaConfig {
+    /// The underlying Reqwest client used for requests.
     client: Client,
+    /// The url to which the request are sent.
     url: Url,
 }
 
 impl AlpacaConfig {
+    /// Create a new `AlpacaConfig`.
     pub fn new(url: String, key_id: String, secret_key: String) -> Result<Self> {
         let mut headers = HeaderMap::new();
         headers.insert(
@@ -42,6 +49,12 @@ impl AlpacaConfig {
         })
     }
 
+    /// Creates an `AlpacaConfig` from environment variables.
+    ///
+    /// The three environment variables used to instantiate the struct are:
+    /// - `APCA_API_BASE_URL`
+    /// - `APCA_API_KEY_ID`
+    /// - `APCA_API_SECRET_KEY`
     pub fn from_env() -> Result<Self> {
         let url = env::var("APCA_API_BASE_URL")?;
         let key_id = env::var("APCA_API_KEY_ID")?;
@@ -50,7 +63,11 @@ impl AlpacaConfig {
     }
 }
 
-pub async fn alpaca_request<T>(
+/// Make a request to Alpaca.
+///
+/// This is a low-level function ment to be used by the higher level
+/// conveniance functions and not by end-users directly.
+async fn alpaca_request<T>(
     method: Method,
     endpoint: &str,
     config: &AlpacaConfig,
