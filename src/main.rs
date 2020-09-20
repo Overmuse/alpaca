@@ -1,5 +1,4 @@
 use alpaca::{assets::*, orders::*, AlpacaConfig};
-use env_logger;
 use log::{error, info};
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {

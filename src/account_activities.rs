@@ -4,7 +4,6 @@ use crate::{alpaca_request, AlpacaConfig};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use uuid::Uuid;
 
 pub async fn get_account_activities(config: &AlpacaConfig) -> Result<Vec<Activity>> {

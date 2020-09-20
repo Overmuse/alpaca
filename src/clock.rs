@@ -3,7 +3,6 @@ use crate::{alpaca_request, AlpacaConfig};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Clock {

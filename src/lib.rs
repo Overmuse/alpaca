@@ -41,7 +41,7 @@ impl AlpacaConfig {
             HeaderValue::from_str(&secret_key).unwrap(),
         );
 
-        let client = Client::builder().default_headers(headers.clone()).build()?;
+        let client = Client::builder().default_headers(headers).build()?;
 
         Ok(AlpacaConfig {
             client,
@@ -86,7 +86,7 @@ where
         .await?;
 
     if response.status().is_success() {
-        return Ok(response.text().await?);
+        Ok(response.text().await?)
     } else if response.status().is_client_error() {
         Err(AlpacaError::ClientError(
             response.status(),

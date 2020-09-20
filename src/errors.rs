@@ -1,5 +1,4 @@
 use thiserror::Error;
-use url;
 
 #[derive(Error, Debug)]
 pub enum AlpacaError {

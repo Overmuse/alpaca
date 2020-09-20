@@ -86,7 +86,7 @@ pub enum AlpacaMessage {
     Listening {
         streams: Vec<String>,
     },
-    TradeUpdates(OrderEvent),
+    TradeUpdates(Box<OrderEvent>),
     AccountUpdates {
         id: String,
         created_at: String,

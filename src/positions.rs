@@ -3,7 +3,6 @@ use crate::utils::from_str;
 use crate::{alpaca_request, AlpacaConfig};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
