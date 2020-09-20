@@ -1,13 +1,12 @@
-use anyhow::Result;
+use crate::errors::Result;
+use crate::utils::*;
+use crate::{alpaca_request, AlpacaConfig};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::ops::Neg;
 use uuid::Uuid;
-
-use crate::utils::*;
-use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]

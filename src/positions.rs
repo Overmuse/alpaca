@@ -1,11 +1,10 @@
-use anyhow::Result;
+use crate::errors::Result;
+use crate::utils::from_str;
+use crate::{alpaca_request, AlpacaConfig};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
-
-use crate::utils::from_str;
-use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all(serialize = "lowercase", deserialize = "lowercase"))]

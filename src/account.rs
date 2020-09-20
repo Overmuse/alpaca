@@ -1,12 +1,11 @@
-use anyhow::Result;
+use crate::errors::Result;
+use crate::utils::from_str;
+use crate::{alpaca_request, AlpacaConfig};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
-
-use crate::utils::from_str;
-use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]

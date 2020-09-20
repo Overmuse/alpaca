@@ -1,11 +1,10 @@
-use anyhow::Result;
+use crate::errors::Result;
+use crate::utils::{hm_from_str, hm_to_string};
+use crate::{alpaca_request, AlpacaConfig};
 use chrono::{NaiveDate, NaiveTime};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json;
-
-use crate::utils::{hm_from_str, hm_to_string};
-use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Calendar {

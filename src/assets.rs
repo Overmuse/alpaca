@@ -1,9 +1,8 @@
-use anyhow::Result;
+use crate::errors::Result;
+use crate::{alpaca_request, AlpacaConfig};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]

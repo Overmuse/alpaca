@@ -1,19 +1,11 @@
-use alpaca::{
-    account::*, account_activities::*, assets::*, calendar::*, orders::*, positions::*,
-    AlpacaConfig,
-};
+use alpaca::{assets::*, orders::*, AlpacaConfig};
 use env_logger;
 use log::{error, info};
-use std::env;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let config = AlpacaConfig::new(
-        "https://paper-api.alpaca.markets/v2/".to_string(),
-        env::var("APCA_API_KEY_ID")?,
-        env::var("APCA_API_SECRET_KEY")?,
-    )?;
+    let config = AlpacaConfig::from_env()?;
 
-    let o = OrderIntent {
+    let _o = OrderIntent {
         symbol: "AAPL".to_string(),
         qty: 1,
         side: alpaca::orders::Side::Buy,
@@ -33,7 +25,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
     //println!("{:#?}", get_account_activities(&config).await);
     //println!("{:?}", get_calendar(&config).await.unwrap());
-    println!("{:#?}", get_asset(&config, "AAPL").await.unwrap());
+    println!("{:#?}", get_asset(&config, "AAPL").await?);
     Ok(())
 }
 

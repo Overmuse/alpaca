@@ -1,12 +1,11 @@
-use anyhow::Result;
+use crate::errors::Result;
+use crate::utils::*;
+use crate::{alpaca_request, AlpacaConfig};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
-
-use crate::utils::*;
-use crate::{alpaca_request, AlpacaConfig};
 
 pub async fn get_account_activities(config: &AlpacaConfig) -> Result<Vec<Activity>> {
     let res = alpaca_request(Method::GET, "account/activities", config, None::<Activity>).await?;
