@@ -290,6 +290,7 @@ pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mockito::mock;
 
     #[test]
     fn serde() {
@@ -316,5 +317,125 @@ mod tests {
         }"#;
         let deserialized: OrderIntent = serde_json::from_str(json).unwrap();
         let _serialized = serde_json::to_string(&deserialized).unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_order() {
+        let _m = mock("GET", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .with_body(
+                r#"
+                    {
+			  "id": "904837e3-3b76-47ec-b432-046db621571b",
+			  "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
+			  "created_at": "2018-10-05T05:48:59Z",
+			  "updated_at": "2018-10-05T05:48:59Z",
+			  "submitted_at": "2018-10-05T05:48:59Z",
+			  "filled_at": "2018-10-05T05:48:59Z",
+			  "expired_at": "2018-10-05T05:48:59Z",
+			  "canceled_at": "2018-10-05T05:48:59Z",
+			  "failed_at": "2018-10-05T05:48:59Z",
+			  "replaced_at": "2018-10-05T05:48:59Z",
+			  "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
+			  "replaces": null,
+			  "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
+			  "symbol": "AAPL",
+			  "asset_class": "us_equity",
+			  "qty": "15",
+			  "filled_qty": "0",
+			  "type": "market",
+			  "side": "buy",
+			  "time_in_force": "day",
+			  "limit_price": "107.00",
+			  "stop_price": "106.00",
+			  "filled_avg_price": "106.00",
+			  "status": "accepted",
+			  "extended_hours": false,
+			  "legs": null,
+                          "trail_price": "1.05",
+                          "trail_percent": null,
+                          "hwm": "108.05"
+			}
+                "#,
+            )
+            .create();
+        let config = AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap();
+
+        get_order(&config, "904837e3-3b76-47ec-b432-046db621571b")
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_orders() {
+        let _m = mock("GET", "/orders")
+            .with_body(
+                r#"[
+                    {
+			  "id": "904837e3-3b76-47ec-b432-046db621571b",
+			  "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
+			  "created_at": "2018-10-05T05:48:59Z",
+			  "updated_at": "2018-10-05T05:48:59Z",
+			  "submitted_at": "2018-10-05T05:48:59Z",
+			  "filled_at": "2018-10-05T05:48:59Z",
+			  "expired_at": "2018-10-05T05:48:59Z",
+			  "canceled_at": "2018-10-05T05:48:59Z",
+			  "failed_at": "2018-10-05T05:48:59Z",
+			  "replaced_at": "2018-10-05T05:48:59Z",
+			  "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
+			  "replaces": null,
+			  "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
+			  "symbol": "AAPL",
+			  "asset_class": "us_equity",
+			  "qty": "15",
+			  "filled_qty": "0",
+			  "type": "market",
+			  "side": "buy",
+			  "time_in_force": "day",
+			  "limit_price": "107.00",
+			  "stop_price": "106.00",
+			  "filled_avg_price": "106.00",
+			  "status": "accepted",
+			  "extended_hours": false,
+			  "legs": null,
+                          "trail_price": "1.05",
+                          "trail_percent": null,
+                          "hwm": "108.05"
+			}
+                ]"#,
+            )
+            .create();
+        let config = AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap();
+
+        get_orders(&config).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn missing_order() {
+        let _m = mock("GET", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .with_status(404)
+            .create();
+
+        let config = AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap();
+
+        let res = get_order(&config, "904837e3-3b76-47ec-b432-046db621571b")
+            .await
+            .unwrap();
+
+        assert!(res.is_err())
     }
 }

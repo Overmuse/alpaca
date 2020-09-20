@@ -21,18 +21,29 @@ pub async fn get_clock(config: &AlpacaConfig) -> Result<Clock> {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
+    use mockito::mock;
 
-    #[test]
-    fn serde() {
-        let json = r#"{
-            "timestamp": "2018-04-01T12:00:00.000Z",
-            "is_open": true,
-            "next_open": "2018-04-01T12:00:00.000Z",
-            "next_close": "2018-04-01T12:00:00.000Z"
-        }"#;
-        let deserialized: Clock = serde_json::from_str(json).unwrap();
-        let _serialized = serde_json::to_string(&deserialized).unwrap();
+    #[tokio::test]
+    async fn test_get_clock() {
+        let _m = mock("GET", "/clock")
+            .with_body(
+                r#"{
+                    "timestamp": "2018-04-01T12:00:00.000Z",
+                    "is_open": true,
+                    "next_open": "2018-04-01T12:00:00.000Z",
+                    "next_close": "2018-04-01T12:00:00.000Z"
+                }"#,
+            )
+            .create();
+        let config = AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap();
+
+        get_clock(&config).await.unwrap();
     }
 }

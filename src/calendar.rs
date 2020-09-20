@@ -23,17 +23,30 @@ pub async fn get_calendar(config: &AlpacaConfig) -> Result<Vec<Calendar>> {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
+    use mockito::mock;
 
-    #[test]
-    fn serde() {
-        let json = r#"{
-            "date": "2018-01-03",
-            "open": "09:30",
-            "close": "16:00"
-        }"#;
-        let deserialized: Calendar = serde_json::from_str(json).unwrap();
-        let _serialized = serde_json::to_string(&deserialized).unwrap();
+    #[tokio::test]
+    async fn test_get_calendar() {
+        let _m = mock("GET", "/calendar")
+            .with_body(
+                r#"[
+		       {
+			  "date": "2018-01-03",
+			  "open": "09:30",
+			  "close": "16:00"
+		       }
+		]"#,
+            )
+            .create();
+        let config = AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap();
+
+        get_calendar(&config).await.unwrap();
     }
 }
