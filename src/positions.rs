@@ -5,7 +5,20 @@ use serde_json;
 use uuid::Uuid;
 
 use crate::utils::from_str;
-use crate::{alpaca_request, AlpacaConfig, Side};
+use crate::{alpaca_request, AlpacaConfig};
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all(serialize = "lowercase", deserialize = "lowercase"))]
+pub enum Side {
+    Long,
+    Short,
+}
+
+impl Default for Side {
+    fn default() -> Side {
+        Side::Long
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Position {

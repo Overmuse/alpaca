@@ -16,7 +16,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let o = OrderIntent {
         symbol: "AAPL".to_string(),
         qty: 1,
-        side: alpaca::Side::Buy,
+        side: alpaca::orders::Side::Buy,
         order_type: OrderType::Limit { limit_price: 100.0 },
         time_in_force: TimeInForce::GTC,
         extended_hours: false,
@@ -31,9 +31,9 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     };
     //println!("{:#?}", &o);
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
-    //println!("{:#?}", get_account_activities(&config).await.unwrap());
-    println!("{:?}", get_calendar(&config).await.unwrap());
-    //println!("{:#?}", get_positions(&config).await.unwrap());
+    //println!("{:#?}", get_account_activities(&config).await);
+    //println!("{:?}", get_calendar(&config).await.unwrap());
+    println!("{:#?}", get_asset(&config, "AAPL").await.unwrap());
     Ok(())
 }
 

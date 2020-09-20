@@ -4,7 +4,7 @@ use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Client, Method, Url,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 pub mod account;
 pub mod account_activities;
@@ -51,9 +51,12 @@ pub async fn alpaca_request<T>(
 where
     T: Serialize,
 {
+    let mut url = config.url.as_str().to_string().clone();
+    url.push_str(endpoint);
+    println!("{:?}", &url);
     let response = config
         .client
-        .request(method, config.url.join(endpoint)?)
+        .request(method, &url)
         .json(&body)
         .send()
         .await?;
@@ -66,22 +69,5 @@ where
             response.status(),
             response.text().await?
         ))
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
-pub enum Side {
-    Buy,
-    Sell,
-    SellShort,
-    /// Only used for positions
-    Long,
-    Short,
-}
-
-impl Default for Side {
-    fn default() -> Self {
-        Side::Buy
     }
 }

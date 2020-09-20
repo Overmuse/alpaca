@@ -59,3 +59,64 @@ pub async fn get_asset(config: &AlpacaConfig, symbol: &str) -> Result<Asset> {
     let asset: Asset = serde_json::from_str(&res)?;
     Ok(asset)
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use mockito::mock;
+
+    fn get_config() -> AlpacaConfig {
+        AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap()
+    }
+
+    #[tokio::test]
+    async fn test_get_assets() {
+        let _m = mock("GET", "/assets")
+            .with_body(
+                r#"[
+                   	{
+			    "id": "904837e3-3b76-47ec-b432-046db621571b",
+			    "class": "us_equity",
+			    "exchange": "NASDAQ",
+			    "symbol": "AAPL",
+			    "status": "active",
+			    "tradable": true,
+			    "marginable": true,
+			    "shortable": true,
+			    "easy_to_borrow": true
+			  } 
+                    ]"#,
+            )
+            .create();
+
+        get_assets(&get_config()).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_asset() {
+        let _m = mock("GET", "/assets/AAPL")
+            .with_body(
+                r#"
+                   	{
+			    "id": "904837e3-3b76-47ec-b432-046db621571b",
+			    "class": "us_equity",
+			    "exchange": "NASDAQ",
+			    "symbol": "AAPL",
+			    "status": "active",
+			    "tradable": true,
+			    "marginable": true,
+			    "shortable": true,
+			    "easy_to_borrow": true
+			  } 
+		"#,
+            )
+            .create();
+
+        get_asset(&get_config(), "AAPL").await.unwrap();
+    }
+}

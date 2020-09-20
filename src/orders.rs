@@ -3,10 +3,11 @@ use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json;
+use std::ops::Neg;
 use uuid::Uuid;
 
 use crate::utils::*;
-use crate::{alpaca_request, AlpacaConfig, Side};
+use crate::{alpaca_request, AlpacaConfig};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -109,6 +110,30 @@ pub enum OrderStatus {
 impl Default for OrderStatus {
     fn default() -> OrderStatus {
         OrderStatus::New
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum Side {
+    Buy,
+    Sell,
+}
+
+impl Default for Side {
+    fn default() -> Side {
+        Side::Buy
+    }
+}
+
+impl Neg for Side {
+    type Output = Side;
+
+    fn neg(self) -> Self::Output {
+        match self {
+            Side::Buy => Side::Sell,
+            Side::Sell => Side::Buy,
+        }
     }
 }
 

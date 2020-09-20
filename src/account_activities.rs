@@ -6,7 +6,7 @@ use serde_json;
 use uuid::Uuid;
 
 use crate::utils::*;
-use crate::{alpaca_request, AlpacaConfig, Side};
+use crate::{alpaca_request, AlpacaConfig};
 
 pub async fn get_account_activities(config: &AlpacaConfig) -> Result<Vec<Activity>> {
     let res = alpaca_request(Method::GET, "account/activities", config, None::<Activity>).await?;
@@ -18,6 +18,14 @@ pub async fn get_account_activities(config: &AlpacaConfig) -> Result<Vec<Activit
 pub enum FillType {
     Fill,
     PartialFill,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename = "snake_case")]
+pub enum Side {
+    Buy,
+    Sell,
+    SellShort,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
