@@ -282,12 +282,12 @@ pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<()> {
 pub struct CancellationAttempt {
     id: Uuid,
     status: usize,
-    order: Order,
+    body: Order,
 }
 
-pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<CancellationAttempt>> {
+pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
     let res = alpaca_request(Method::DELETE, "orders", config, None::<Order>).await?;
-    let cancellations: Vec<CancellationAttempt> = serde_json::from_str(&res)?;
+    let cancellations: Vec<Order> = serde_json::from_str(&res)?;
     Ok(cancellations)
 }
 

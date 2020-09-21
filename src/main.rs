@@ -24,7 +24,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
     //println!("{:#?}", get_account_activities(&config).await);
     //println!("{:?}", get_calendar(&config).await.unwrap());
-    println!("{:#?}", get_asset(&config, "AAPL").await?);
+    println!("{:#?}", cancel_all_orders(&config).await?);
     Ok(())
 }
 

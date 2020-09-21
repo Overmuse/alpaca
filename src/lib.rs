@@ -19,7 +19,7 @@ mod utils;
 
 /// The main client used for making request to Alpaca.
 ///
-/// `AlpacaConfig` stores an async Reqwest client as well as the associate 
+/// `AlpacaConfig` stores an async Reqwest client as well as the associate
 /// base url for the Alpaca server.
 pub struct AlpacaConfig {
     /// The underlying Reqwest client used for requests.
