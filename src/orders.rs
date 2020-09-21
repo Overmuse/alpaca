@@ -267,22 +267,28 @@ pub async fn replace_order(
     Ok(order)
 }
 
-pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
-    let res = alpaca_request(
+pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<()> {
+    alpaca_request(
         Method::DELETE,
         &format!("orders/{}", order_id),
         config,
         None::<Order>,
     )
-    .await?;
-    let order: Order = serde_json::from_str(&res)?;
-    Ok(order)
+    .await
+    .map(|_| ())
 }
 
-pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CancellationAttempt {
+    id: Uuid,
+    status: usize,
+    order: Order,
+}
+
+pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<CancellationAttempt>> {
     let res = alpaca_request(Method::DELETE, "orders", config, None::<Order>).await?;
-    let order: Vec<Order> = serde_json::from_str(&res)?;
-    Ok(order)
+    let cancellations: Vec<CancellationAttempt> = serde_json::from_str(&res)?;
+    Ok(cancellations)
 }
 
 #[cfg(test)]
@@ -430,10 +436,59 @@ mod tests {
         )
         .unwrap();
 
-        let res = get_order(&config, "904837e3-3b76-47ec-b432-046db621571b")
-            .await
-            .unwrap();
+        let res = get_order(&config, "904837e3-3b76-47ec-b432-046db621571b").await;
 
         assert!(res.is_err())
+    }
+
+    #[tokio::test]
+    async fn test_cancel_order() {
+        let _m = mock("DELETE", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .with_status(204)
+            .with_body(
+                r#"{
+                    "id": "904837e3-3b76-47ec-b432-046db621571b",
+		    "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
+	            "created_at": "2018-10-05T05:48:59Z",
+		    "updated_at": "2018-10-05T05:48:59Z",
+		    "submitted_at": "2018-10-05T05:48:59Z",
+		    "filled_at": "2018-10-05T05:48:59Z",
+		    "expired_at": "2018-10-05T05:48:59Z",
+		    "canceled_at": "2018-10-05T05:48:59Z",
+		    "failed_at": "2018-10-05T05:48:59Z",
+		    "replaced_at": "2018-10-05T05:48:59Z",
+		    "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
+		    "replaces": null,
+		    "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
+		    "symbol": "AAPL",
+		    "asset_class": "us_equity",
+		    "qty": "15",
+		    "filled_qty": "0",
+		    "type": "market",
+		    "side": "buy",
+		    "time_in_force": "day",
+		    "limit_price": "107.00",
+		    "stop_price": "106.00",
+		    "filled_avg_price": "106.00",
+		    "status": "accepted",
+		    "extended_hours": false,
+		    "legs": null,
+                    "trail_price": "1.05",
+                    "trail_percent": null,
+                    "hwm": "108.05"
+		}"#,
+            )
+            .create();
+
+        let config = AlpacaConfig::new(
+            mockito::server_url(),
+            "APCA_API_KEY_ID".to_string(),
+            "APCA_API_SECRET_KEY".to_string(),
+        )
+        .unwrap();
+
+        cancel_order(&config, "904837e3-3b76-47ec-b432-046db621571b")
+            .await
+            .unwrap();
     }
 }
