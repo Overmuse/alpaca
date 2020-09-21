@@ -25,6 +25,18 @@ pub enum OrderType {
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         stop_price: f64,
     },
+    TrailingStop {
+        #[serde(
+            deserialize_with = "from_str_optional",
+            serialize_with = "to_string_optional"
+        )]
+        trail_price: Option<f64>,
+        #[serde(
+            deserialize_with = "from_str_optional",
+            serialize_with = "to_string_optional"
+        )]
+        trail_percent: Option<f64>,
+    },
 }
 
 impl Default for OrderType {
@@ -226,6 +238,11 @@ pub struct Order {
     pub status: OrderStatus,
     pub extended_hours: bool,
     pub legs: Option<Vec<Order>>,
+    #[serde(
+        deserialize_with = "from_str_optional",
+        serialize_with = "to_string_optional"
+    )]
+    pub hwm: Option<f64>,
 }
 
 pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
