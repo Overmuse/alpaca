@@ -1,7 +1,6 @@
-use crate::errors::Result;
-use crate::{alpaca_request, AlpacaConfig};
-use reqwest::Method;
+use crate::Request;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -41,31 +40,34 @@ pub struct Asset {
     easy_to_borrow: bool,
 }
 
-pub async fn get_assets(config: &AlpacaConfig) -> Result<Vec<Asset>> {
-    let res = alpaca_request(Method::GET, "assets", config, None::<Asset>).await?;
-    let assets: Vec<Asset> = serde_json::from_str(&res)?;
-    Ok(assets)
+pub struct GetAssets;
+impl Request for GetAssets {
+    type Body = ();
+    type Response = Vec<Asset>;
+
+    fn endpoint(&self) -> Cow<str> {
+        "assets".into()
+    }
 }
 
-pub async fn get_asset(config: &AlpacaConfig, symbol: &str) -> Result<Asset> {
-    let res = alpaca_request(
-        Method::GET,
-        &format!("assets/{}", symbol),
-        config,
-        None::<Asset>,
-    )
-    .await?;
-    let asset: Asset = serde_json::from_str(&res)?;
-    Ok(asset)
+pub struct GetAsset<'a>(pub &'a str);
+impl Request for GetAsset<'_> {
+    type Body = ();
+    type Response = Asset;
+
+    fn endpoint(&self) -> Cow<str> {
+        format!("assets/{}", self.0).into()
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::Client;
     use mockito::mock;
 
-    fn get_config() -> AlpacaConfig {
-        AlpacaConfig::new(
+    fn get_client() -> Client {
+        Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
@@ -93,7 +95,7 @@ mod test {
             )
             .create();
 
-        get_assets(&get_config()).await.unwrap();
+        get_client().send(GetAssets {}).await.unwrap();
     }
 
     #[tokio::test]
@@ -116,6 +118,6 @@ mod test {
             )
             .create();
 
-        get_asset(&get_config(), "AAPL").await.unwrap();
+        get_client().send(GetAsset("AAPL")).await.unwrap();
     }
 }

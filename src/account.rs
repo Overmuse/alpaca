@@ -1,9 +1,8 @@
-use crate::errors::Result;
 use crate::utils::from_str;
-use crate::{alpaca_request, AlpacaConfig};
+use crate::Request;
 use chrono::{DateTime, Utc};
-use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -58,15 +57,27 @@ pub struct Account {
     regt_buying_power: f64,
 }
 
-pub async fn get_account(config: &AlpacaConfig) -> Result<Account> {
-    let res = alpaca_request(Method::GET, "account", config, None::<Account>).await?;
-    let account = serde_json::from_str(&res)?;
-    Ok(account)
+pub struct GetAccount;
+
+impl Request for GetAccount {
+    type Body = ();
+    type Response = Account;
+
+    fn endpoint(&self) -> Cow<str> {
+        "account".into()
+    }
 }
+
+//pub async fn get_account(client: &Client) -> Result<Account> {
+//    let res = alpaca_request(Method::GET, "account", client, None::<Account>).await?;
+//    let account = serde_json::from_str(&res)?;
+//    Ok(account)
+//}
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::Client;
     use mockito::mock;
 
     #[tokio::test]
@@ -103,13 +114,13 @@ mod test {
 		}"#,
             )
             .create();
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        get_account(&config).await.unwrap();
+        client.send(GetAccount {}).await.unwrap();
     }
 }

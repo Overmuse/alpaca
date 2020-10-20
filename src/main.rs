@@ -1,8 +1,8 @@
-use alpaca::{assets::*, orders::*, AlpacaConfig};
+use alpaca::{assets::*, orders::*, Client};
 use log::{error, info};
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let config = AlpacaConfig::from_env()?;
+    let client = Client::from_env()?;
 
     let o = OrderIntent {
         symbol: "AAPL".to_string(),
@@ -17,18 +17,17 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         client_order_id: Some("TEST".to_string()),
         order_class: OrderClass::Simple,
     };
-    println!("{:#?}", submit_order(&config, &o).await);
+    //println!("{:#?}", submit_order(&client, &o).await);
     //println!("{:#?}", &serde_json::to_string(&o).unwrap());
-    //println!("{:#?}", get_account_activities(&config).await);
-    //println!("{:?}", get_calendar(&config).await.unwrap());
-    //println!("{:#?}", cancel_all_orders(&config).await?);
-    //println!("{:#?}", get_orders(&config).await?);
+    //println!("{:#?}", get_account_activities(&client).await);
+    //println!("{:?}", get_calendar(&client).await.unwrap());
+    //println!("{:#?}", cancel_all_orders(&client).await?);
+    //println!("{:#?}", get_orders(&client).await?);
     Ok(())
 }
 
 fn main() {
     let mut rt = tokio::runtime::Runtime::new().unwrap();
-    env_logger::init();
 
     match rt.block_on(run()) {
         Ok(()) => info!("All done!"),

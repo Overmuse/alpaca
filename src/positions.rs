@@ -1,8 +1,8 @@
-use crate::errors::Result;
 use crate::utils::from_str;
-use crate::{alpaca_request, AlpacaConfig};
+use crate::Request;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -49,38 +49,43 @@ pub struct Position {
     pub change_today: f64,
 }
 
-pub async fn get_positions(config: &AlpacaConfig) -> Result<Vec<Position>> {
-    let res = alpaca_request(Method::GET, "positions", config, None::<Position>).await?;
-    let positions: Vec<Position> = serde_json::from_str(&res)?;
-    Ok(positions)
+pub struct GetPositions;
+impl Request for GetPositions {
+    type Body = ();
+    type Response = Vec<Position>;
+
+    fn endpoint(&self) -> Cow<str> {
+        "positions".into()
+    }
 }
 
-pub async fn get_position(config: &AlpacaConfig, position: &str) -> Result<Position> {
-    let res = alpaca_request(
-        Method::GET,
-        &format!("positions/{}", position),
-        config,
-        None::<Position>,
-    )
-    .await?;
-    let position: Position = serde_json::from_str(&res)?;
-    Ok(position)
+pub struct GetPosition<'a>(pub &'a str);
+impl Request for GetPosition<'_> {
+    type Body = ();
+    type Response = Position;
+
+    fn endpoint(&self) -> Cow<str> {
+        format!("positions/{}", self.0).into()
+    }
 }
 
-pub async fn close_all_positions(config: &AlpacaConfig) -> Result<Vec<Position>> {
-    let res = alpaca_request(Method::DELETE, "positions", config, None::<Position>).await?;
-    let positions: Vec<Position> = serde_json::from_str(&res)?;
-    Ok(positions)
+pub struct CloseAllPositions;
+impl Request for CloseAllPositions {
+    type Body = ();
+    type Response = Vec<Position>;
+    const METHOD: Method = Method::DELETE;
+
+    fn endpoint(&self) -> Cow<str> {
+        "positions".into()
+    }
 }
 
-pub async fn close_position(config: &AlpacaConfig, position: &str) -> Result<Position> {
-    let res = alpaca_request(
-        Method::DELETE,
-        &format!("positions/{}", position),
-        config,
-        None::<Position>,
-    )
-    .await?;
-    let position: Position = serde_json::from_str(&res)?;
-    Ok(position)
+pub struct ClosePosition<'a>(pub &'a str);
+impl Request for ClosePosition<'_> {
+    type Body = ();
+    type Response = Position;
+
+    fn endpoint(&self) -> Cow<str> {
+        format!("positions/{}", self.0).into()
+    }
 }

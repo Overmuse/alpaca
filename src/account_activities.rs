@@ -1,16 +1,10 @@
-use crate::errors::Result;
 use crate::utils::*;
-use crate::{alpaca_request, AlpacaConfig};
+use crate::Request;
 use chrono::{DateTime, Utc};
-use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use uuid::Uuid;
 
-pub async fn get_account_activities(config: &AlpacaConfig) -> Result<Vec<Activity>> {
-    let res = alpaca_request(Method::GET, "account/activities", config, None::<Activity>).await?;
-    let result: Vec<Activity> = serde_json::from_str(&res)?;
-    Ok(result)
-}
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum FillType {
@@ -65,4 +59,14 @@ pub enum Activity {
         )]
         per_share_amount: Option<f64>,
     },
+}
+
+pub struct GetAccountActivities;
+impl Request for GetAccountActivities {
+    type Body = ();
+    type Response = Vec<Activity>;
+
+    fn endpoint(&self) -> Cow<str> {
+        "account/activities".into()
+    }
 }

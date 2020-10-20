@@ -1,9 +1,8 @@
-use crate::errors::Result;
 use crate::utils::{hm_from_str, hm_to_string};
-use crate::{alpaca_request, AlpacaConfig};
+use crate::Request;
 use chrono::{NaiveDate, NaiveTime};
-use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Calendar {
@@ -14,15 +13,20 @@ pub struct Calendar {
     pub close: NaiveTime,
 }
 
-pub async fn get_calendar(config: &AlpacaConfig) -> Result<Vec<Calendar>> {
-    let res = alpaca_request(Method::GET, "calendar", config, None::<Calendar>).await?;
-    let calendar: Vec<Calendar> = serde_json::from_str(&res)?;
-    Ok(calendar)
+pub struct GetCalendar;
+impl Request for GetCalendar {
+    type Body = ();
+    type Response = Vec<Calendar>;
+
+    fn endpoint(&self) -> Cow<str> {
+        "calendar".into()
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::Client;
     use mockito::mock;
 
     #[tokio::test]
@@ -38,13 +42,13 @@ mod test {
 		]"#,
             )
             .create();
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        get_calendar(&config).await.unwrap();
+        client.send(GetCalendar {}).await.unwrap();
     }
 }

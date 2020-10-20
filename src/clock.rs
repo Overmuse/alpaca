@@ -1,8 +1,7 @@
-use crate::Result;
-use crate::{alpaca_request, AlpacaConfig};
+use crate::Request;
 use chrono::{DateTime, Utc};
-use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Clock {
@@ -12,15 +11,20 @@ pub struct Clock {
     pub next_close: DateTime<Utc>,
 }
 
-pub async fn get_clock(config: &AlpacaConfig) -> Result<Clock> {
-    let res = alpaca_request(Method::GET, "clock", config, None::<Clock>).await?;
-    let clock: Clock = serde_json::from_str(&res)?;
-    Ok(clock)
+pub struct GetClock;
+impl Request for GetClock {
+    type Body = ();
+    type Response = Clock;
+
+    fn endpoint(&self) -> Cow<str> {
+        "clock".into()
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::Client;
     use mockito::mock;
 
     #[tokio::test]
@@ -35,13 +39,13 @@ mod test {
                 }"#,
             )
             .create();
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        get_clock(&config).await.unwrap();
+        client.send(GetClock {}).await.unwrap();
     }
 }

@@ -8,9 +8,6 @@ pub enum AlpacaError {
     #[error("Reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
 
-    #[error("Invalid url: {0}")]
-    InvalidUrl(#[from] url::ParseError),
-
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),
 

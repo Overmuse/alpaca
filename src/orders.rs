@@ -1,9 +1,9 @@
-use crate::errors::Result;
 use crate::utils::*;
-use crate::{alpaca_request, AlpacaConfig};
+use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::ops::Neg;
 use uuid::Uuid;
 
@@ -245,54 +245,65 @@ pub struct Order {
     pub hwm: Option<f64>,
 }
 
-pub async fn get_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-    let res = alpaca_request(Method::GET, "orders", config, None::<Order>).await?;
-    let orders: Vec<Order> = serde_json::from_str(&res)?;
-    Ok(orders)
+pub struct GetOrders;
+impl Request for GetOrders {
+    type Body = ();
+    type Response = Vec<Order>;
+
+    fn endpoint(&self) -> Cow<str> {
+        "orders".into()
+    }
 }
 
-pub async fn get_order(config: &AlpacaConfig, order_id: &str) -> Result<Order> {
-    let res = alpaca_request(
-        Method::GET,
-        &format!("orders/{}", order_id),
-        config,
-        None::<Order>,
-    )
-    .await?;
-    let order: Order = serde_json::from_str(&res)?;
-    Ok(order)
+pub struct GetOrder<'a>(pub &'a str);
+impl Request for GetOrder<'_> {
+    type Body = ();
+    type Response = Order;
+
+    fn endpoint(&self) -> Cow<str> {
+        format!("orders/{}", self.0).into()
+    }
 }
 
-pub async fn submit_order(config: &AlpacaConfig, order: &OrderIntent) -> Result<Order> {
-    let res = alpaca_request(Method::POST, "orders", config, Some(order)).await?;
-    let order = serde_json::from_str(&res)?;
-    Ok(order)
-}
-pub async fn replace_order(
-    config: &AlpacaConfig,
-    order_id: &str,
-    order: &OrderIntent,
-) -> Result<Order> {
-    let res = alpaca_request(
-        Method::PATCH,
-        &format!("orders/{}", order_id),
-        config,
-        Some(order),
-    )
-    .await?;
-    let order = serde_json::from_str(&res)?;
-    Ok(order)
+pub struct SubmitOrder(pub OrderIntent);
+impl Request for SubmitOrder {
+    type Body = OrderIntent;
+    type Response = Order;
+    const METHOD: Method = Method::POST;
+
+    fn endpoint(&self) -> Cow<str> {
+        "orders".into()
+    }
+
+    fn body(&self) -> RequestBody<&OrderIntent> {
+        RequestBody::Json(&self.0)
+    }
 }
 
-pub async fn cancel_order(config: &AlpacaConfig, order_id: &str) -> Result<()> {
-    alpaca_request(
-        Method::DELETE,
-        &format!("orders/{}", order_id),
-        config,
-        None::<Order>,
-    )
-    .await
-    .map(|_| ())
+pub struct ReplaceOrder<'a>(pub &'a str, pub OrderIntent);
+impl Request for ReplaceOrder<'_> {
+    type Body = OrderIntent;
+    type Response = Order;
+    const METHOD: Method = Method::POST;
+
+    fn endpoint(&self) -> Cow<str> {
+        format!("orders/{}", self.0).into()
+    }
+
+    fn body(&self) -> RequestBody<&OrderIntent> {
+        RequestBody::Json(&self.1)
+    }
+}
+
+pub struct CancelOrder<'a>(pub &'a str);
+impl Request for CancelOrder<'_> {
+    type Body = ();
+    type Response = ();
+    const METHOD: Method = Method::DELETE;
+
+    fn endpoint(&self) -> Cow<str> {
+        format!("orders/{}", self.0).into()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -302,15 +313,21 @@ pub struct CancellationAttempt {
     body: Order,
 }
 
-pub async fn cancel_all_orders(config: &AlpacaConfig) -> Result<Vec<Order>> {
-    let res = alpaca_request(Method::DELETE, "orders", config, None::<Order>).await?;
-    let cancellations: Vec<Order> = serde_json::from_str(&res)?;
-    Ok(cancellations)
+pub struct CancelAllOrders();
+impl Request for CancelAllOrders {
+    type Body = ();
+    type Response = Vec<Order>;
+    const METHOD: Method = Method::DELETE;
+
+    fn endpoint(&self) -> Cow<str> {
+        "orders".into()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Client;
     use mockito::mock;
 
     #[test]
@@ -379,14 +396,15 @@ mod tests {
                 "#,
             )
             .create();
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        get_order(&config, "904837e3-3b76-47ec-b432-046db621571b")
+        client
+            .send(GetOrder("904837e3-3b76-47ec-b432-046db621571b"))
             .await
             .unwrap();
     }
@@ -430,14 +448,14 @@ mod tests {
                 ]"#,
             )
             .create();
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        get_orders(&config).await.unwrap();
+        client.send(GetOrders {}).await.unwrap();
     }
 
     #[tokio::test]
@@ -446,14 +464,16 @@ mod tests {
             .with_status(404)
             .create();
 
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        let res = get_order(&config, "904837e3-3b76-47ec-b432-046db621571b").await;
+        let res = client
+            .send(GetOrder("904837e3-3b76-47ec-b432-046db621571b"))
+            .await;
 
         assert!(res.is_err())
     }
@@ -497,14 +517,15 @@ mod tests {
             )
             .create();
 
-        let config = AlpacaConfig::new(
+        let client = Client::new(
             mockito::server_url(),
             "APCA_API_KEY_ID".to_string(),
             "APCA_API_SECRET_KEY".to_string(),
         )
         .unwrap();
 
-        cancel_order(&config, "904837e3-3b76-47ec-b432-046db621571b")
+        client
+            .send(CancelOrder("904837e3-3b76-47ec-b432-046db621571b"))
             .await
             .unwrap();
     }

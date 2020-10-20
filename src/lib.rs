@@ -1,9 +1,10 @@
-use crate::errors::{AlpacaError, Result};
+use crate::errors::Result;
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
-    Client, Method, Url,
+    Client as ReqwestClient, Method, RequestBuilder,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::env;
 
 pub mod account;
@@ -17,19 +18,60 @@ pub mod positions;
 pub mod stream;
 mod utils;
 
+pub enum RequestBody<T> {
+    None,
+    Query(T),
+    Json(T),
+}
+
+impl<T> Default for RequestBody<T> {
+    fn default() -> Self {
+        RequestBody::None
+    }
+}
+
+pub trait Request {
+    type Body: Serialize;
+    type Response: for<'de> Deserialize<'de>;
+    const METHOD: Method = Method::GET;
+
+    fn endpoint(&self) -> Cow<str>;
+
+    fn headers(&self) -> HeaderMap {
+        Default::default()
+    }
+
+    fn body(&self) -> RequestBody<&Self::Body> {
+        Default::default()
+    }
+}
+
+trait RequestBuilderExt: Sized {
+    fn apca_body<T: Serialize>(self, body: RequestBody<T>) -> Self;
+}
+
+impl RequestBuilderExt for RequestBuilder {
+    fn apca_body<T: Serialize>(self, body: RequestBody<T>) -> Self {
+        match body {
+            RequestBody::None => self,
+            RequestBody::Json(value) => self.json(&value),
+            RequestBody::Query(value) => self.query(&value),
+        }
+    }
+}
 /// The main client used for making request to Alpaca.
 ///
 /// `AlpacaConfig` stores an async Reqwest client as well as the associate
 /// base url for the Alpaca server.
-pub struct AlpacaConfig {
+pub struct Client {
     /// The underlying Reqwest client used for requests.
-    client: Client,
+    inner: ReqwestClient,
     /// The url to which the request are sent.
-    url: Url,
+    url: String,
 }
 
-impl AlpacaConfig {
-    /// Create a new `AlpacaConfig`.
+impl Client {
+    /// Create a new `Client`.
     pub fn new(url: String, key_id: String, secret_key: String) -> Result<Self> {
         let mut headers = HeaderMap::new();
         headers.insert(
@@ -41,15 +83,12 @@ impl AlpacaConfig {
             HeaderValue::from_str(&secret_key).unwrap(),
         );
 
-        let client = Client::builder().default_headers(headers).build()?;
+        let inner = ReqwestClient::builder().default_headers(headers).build()?;
 
-        Ok(AlpacaConfig {
-            client,
-            url: Url::parse(&url)?,
-        })
+        Ok(Self { inner, url })
     }
 
-    /// Creates an `AlpacaConfig` from environment variables.
+    /// Creates a `Client` from environment variables.
     ///
     /// The three environment variables used to instantiate the struct are:
     /// - `APCA_API_BASE_URL`
@@ -61,41 +100,20 @@ impl AlpacaConfig {
         let secret_key = env::var("APCA_API_SECRET_KEY")?;
         Self::new(url, key_id, secret_key)
     }
-}
 
-/// Make a request to Alpaca.
-///
-/// This is a low-level function ment to be used by the higher level
-/// conveniance functions and not by end-users directly.
-async fn alpaca_request<T>(
-    method: Method,
-    endpoint: &str,
-    config: &AlpacaConfig,
-    body: Option<T>,
-) -> Result<String>
-where
-    T: Serialize,
-{
-    let mut url = config.url.as_str().to_string().clone();
-    url.push_str(endpoint);
-    let response = config
-        .client
-        .request(method, &url)
-        .json(&body)
-        .send()
-        .await?;
+    pub async fn send<R: Request>(&self, request: R) -> Result<R::Response> {
+        let endpoint = request.endpoint();
+        let endpoint = endpoint.trim_matches('/');
+        let url = format!("{}/{}", self.url, endpoint);
 
-    if response.status().is_success() {
-        Ok(response.text().await?)
-    } else if response.status().is_client_error() {
-        Err(AlpacaError::ClientError(
-            response.status(),
-            response.text().await?,
-        ))
-    } else {
-        Err(AlpacaError::ServerError(
-            response.status(),
-            response.text().await?,
-        ))
+        let res = self
+            .inner
+            .request(R::METHOD, &url)
+            .headers(request.headers())
+            .apca_body(request.body())
+            .send()
+            .await?;
+
+        res.json().await.map_err(From::from)
     }
 }
