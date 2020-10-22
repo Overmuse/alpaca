@@ -89,3 +89,12 @@ impl Request for ClosePosition<'_> {
         format!("positions/{}", self.0).into()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::Client;
+    use mockito::mock;
+
+    // TODO: Add tests
+}
