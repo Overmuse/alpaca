@@ -2,7 +2,7 @@ use crate::utils::*;
 use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Cow;
 use std::ops::Neg;
 use uuid::Uuid;
@@ -245,23 +245,98 @@ pub struct Order {
     pub hwm: Option<f64>,
 }
 
-pub struct GetOrders;
+#[derive(Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum QueryOrderStatus {
+    Open,
+    Closed,
+    All,
+}
+impl Default for QueryOrderStatus {
+    fn default() -> Self {
+        QueryOrderStatus::Open
+    }
+}
+
+#[derive(Serialize)]
+pub enum Sort {
+    #[serde(rename = "asc")]
+    Ascending,
+    #[serde(rename = "desc")]
+    Descending,
+}
+impl Default for Sort {
+    fn default() -> Self {
+        Sort::Descending
+    }
+}
+
+#[derive(Serialize)]
+pub struct GetOrders {
+    status: QueryOrderStatus,
+    limit: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    after: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    until: Option<DateTime<Utc>>,
+    direction: Sort,
+    nested: bool,
+}
+impl GetOrders {
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+impl Default for GetOrders {
+    fn default() -> Self {
+        Self {
+            status: Default::default(),
+            limit: 50,
+            after: None,
+            until: None,
+            direction: Default::default(),
+            nested: false,
+        }
+    }
+}
+
 impl Request for GetOrders {
-    type Body = ();
+    type Body = Self;
     type Response = Vec<Order>;
 
     fn endpoint(&self) -> Cow<str> {
         "orders".into()
     }
+
+    fn body(&self) -> RequestBody<&Self> {
+        RequestBody::Query(&self)
+    }
 }
 
-pub struct GetOrder<'a>(pub &'a str);
+#[derive(Serialize)]
+pub struct GetOrder<'a> {
+    #[serde(skip)]
+    pub order_id: &'a str,
+    pub nested: bool,
+}
+impl<'a> GetOrder<'a> {
+    pub fn new(order_id: &'a str) -> Self {
+        Self {
+            order_id,
+            nested: false,
+        }
+    }
+}
 impl Request for GetOrder<'_> {
-    type Body = ();
+    type Body = Self;
     type Response = Order;
 
     fn endpoint(&self) -> Cow<str> {
-        format!("orders/{}", self.0).into()
+        format!("orders/{}", self.order_id).into()
+    }
+
+    fn body(&self) -> RequestBody<&Self> {
+        RequestBody::Query(&self)
     }
 }
 
@@ -295,10 +370,20 @@ impl Request for ReplaceOrder<'_> {
     }
 }
 
+pub struct EmptyResponse;
+impl<'de> Deserialize<'de> for EmptyResponse {
+    fn deserialize<D>(_deserializer: D) -> Result<EmptyResponse, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(EmptyResponse {})
+    }
+}
+
 pub struct CancelOrder<'a>(pub &'a str);
 impl Request for CancelOrder<'_> {
     type Body = ();
-    type Response = ();
+    type Response = EmptyResponse;
     const METHOD: Method = Method::DELETE;
 
     fn endpoint(&self) -> Cow<str> {
@@ -328,7 +413,7 @@ impl Request for CancelAllOrders {
 mod tests {
     use super::*;
     use crate::Client;
-    use mockito::mock;
+    use mockito::{mock, Matcher};
 
     #[test]
     fn serde() {
@@ -360,6 +445,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_order() {
         let _m = mock("GET", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .match_query(Matcher::UrlEncoded("nested".into(), "false".into()))
             .with_body(
                 r#"
                     {
@@ -404,7 +490,7 @@ mod tests {
         .unwrap();
 
         client
-            .send(GetOrder("904837e3-3b76-47ec-b432-046db621571b"))
+            .send(GetOrder::new("904837e3-3b76-47ec-b432-046db621571b"))
             .await
             .unwrap();
     }
@@ -412,6 +498,12 @@ mod tests {
     #[tokio::test]
     async fn test_get_orders() {
         let _m = mock("GET", "/orders")
+            .match_query(Matcher::AllOf(vec![
+                Matcher::UrlEncoded("status".into(), "open".into()),
+                Matcher::UrlEncoded("limit".into(), "50".into()),
+                Matcher::UrlEncoded("direction".into(), "desc".into()),
+                Matcher::UrlEncoded("nested".into(), "false".into()),
+            ]))
             .with_body(
                 r#"[
                     {
@@ -455,12 +547,13 @@ mod tests {
         )
         .unwrap();
 
-        client.send(GetOrders {}).await.unwrap();
+        client.send(GetOrders::new()).await.unwrap();
     }
 
     #[tokio::test]
     async fn missing_order() {
         let _m = mock("GET", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .match_query(Matcher::UrlEncoded("nested".into(), "false".into()))
             .with_status(404)
             .create();
 
@@ -472,7 +565,7 @@ mod tests {
         .unwrap();
 
         let res = client
-            .send(GetOrder("904837e3-3b76-47ec-b432-046db621571b"))
+            .send(GetOrder::new("904837e3-3b76-47ec-b432-046db621571b"))
             .await;
 
         assert!(res.is_err())

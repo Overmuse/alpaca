@@ -1,5 +1,5 @@
 use crate::utils::{hm_from_str, hm_to_string};
-use crate::Request;
+use crate::{Request, RequestBody};
 use chrono::{NaiveDate, NaiveTime};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -13,13 +13,35 @@ pub struct Calendar {
     pub close: NaiveTime,
 }
 
-pub struct GetCalendar;
+#[derive(Serialize)]
+pub struct GetCalendar {
+    start: NaiveDate,
+    end: NaiveDate,
+}
+impl GetCalendar {
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+impl Default for GetCalendar {
+    fn default() -> Self {
+        Self {
+            start: NaiveDate::from_ymd(1970, 1, 1),
+            end: NaiveDate::from_ymd(2029, 12, 31),
+        }
+    }
+}
+
 impl Request for GetCalendar {
-    type Body = ();
+    type Body = Self;
     type Response = Vec<Calendar>;
 
     fn endpoint(&self) -> Cow<str> {
         "calendar".into()
+    }
+
+    fn body(&self) -> RequestBody<&Self> {
+        RequestBody::Query(&self)
     }
 }
 
@@ -27,11 +49,15 @@ impl Request for GetCalendar {
 mod test {
     use super::*;
     use crate::Client;
-    use mockito::mock;
+    use mockito::{mock, Matcher};
 
     #[tokio::test]
     async fn test_get_calendar() {
         let _m = mock("GET", "/calendar")
+            .match_query(Matcher::AllOf(vec![
+                Matcher::UrlEncoded("start".into(), "1970-01-01".into()),
+                Matcher::UrlEncoded("end".into(), "2029-12-31".into()),
+            ]))
             .with_body(
                 r#"[
 		       {
@@ -49,6 +75,6 @@ mod test {
         )
         .unwrap();
 
-        client.send(GetCalendar {}).await.unwrap();
+        client.send(GetCalendar::new()).await.unwrap();
     }
 }

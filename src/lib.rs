@@ -1,4 +1,5 @@
 use crate::errors::Result;
+use futures::future::TryFutureExt;
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Client as ReqwestClient, Method, RequestBuilder,
@@ -59,6 +60,7 @@ impl RequestBuilderExt for RequestBuilder {
         }
     }
 }
+
 /// The main client used for making request to Alpaca.
 ///
 /// `AlpacaConfig` stores an async Reqwest client as well as the associate
@@ -106,14 +108,13 @@ impl Client {
         let endpoint = endpoint.trim_matches('/');
         let url = format!("{}/{}", self.url, endpoint);
 
-        let res = self
-            .inner
+        self.inner
             .request(R::METHOD, &url)
             .headers(request.headers())
             .apca_body(request.body())
             .send()
-            .await?;
-
-        res.json().await.map_err(From::from)
+            .and_then(|res| res.json())
+            .map_err(From::from)
+            .await
     }
 }
