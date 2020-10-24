@@ -10,6 +10,7 @@ use std::env;
 
 pub mod account;
 pub mod account_activities;
+pub mod account_configurations;
 pub mod assets;
 pub mod calendar;
 pub mod clock;
