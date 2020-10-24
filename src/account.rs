@@ -68,12 +68,6 @@ impl Request for GetAccount {
     }
 }
 
-//pub async fn get_account(client: &Client) -> Result<Account> {
-//    let res = alpaca_request(Method::GET, "account", client, None::<Account>).await?;
-//    let account = serde_json::from_str(&res)?;
-//    Ok(account)
-//}
-
 #[cfg(test)]
 mod test {
     use super::*;
