@@ -54,6 +54,8 @@ mod test {
     #[tokio::test]
     async fn test_get_calendar() {
         let _m = mock("GET", "/calendar")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .match_query(Matcher::AllOf(vec![
                 Matcher::UrlEncoded("start".into(), "1970-01-01".into()),
                 Matcher::UrlEncoded("end".into(), "2029-12-31".into()),

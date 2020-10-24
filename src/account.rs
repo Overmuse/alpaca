@@ -77,6 +77,8 @@ mod test {
     #[tokio::test]
     async fn test_get_account() {
         let _m = mock("GET", "/account")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .with_body(
                 r#"{
 		  "account_blocked": false,
@@ -115,6 +117,6 @@ mod test {
         )
         .unwrap();
 
-        client.send(GetAccount {}).await.unwrap();
+        client.send(GetAccount).await.unwrap();
     }
 }

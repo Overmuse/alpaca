@@ -95,6 +95,8 @@ mod test {
     #[tokio::test]
     async fn test_get_assets() {
         let _m = mock("GET", "/assets")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .match_query(Matcher::AllOf(vec![
                 Matcher::UrlEncoded("status".into(), "active".into()),
                 Matcher::UrlEncoded("asset_class".into(), "us_equity".into()),
@@ -126,6 +128,8 @@ mod test {
     #[tokio::test]
     async fn test_get_asset() {
         let _m = mock("GET", "/assets/AAPL")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .with_body(
                 r#"{
                     "id": "904837e3-3b76-47ec-b432-046db621571b",

@@ -445,6 +445,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_order() {
         let _m = mock("GET", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .match_query(Matcher::UrlEncoded("nested".into(), "false".into()))
             .with_body(
                 r#"
@@ -498,6 +500,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_orders() {
         let _m = mock("GET", "/orders")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .match_query(Matcher::AllOf(vec![
                 Matcher::UrlEncoded("status".into(), "open".into()),
                 Matcher::UrlEncoded("limit".into(), "50".into()),
@@ -553,6 +557,8 @@ mod tests {
     #[tokio::test]
     async fn missing_order() {
         let _m = mock("GET", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .match_query(Matcher::UrlEncoded("nested".into(), "false".into()))
             .with_status(404)
             .create();
@@ -574,6 +580,8 @@ mod tests {
     #[tokio::test]
     async fn test_cancel_order() {
         let _m = mock("DELETE", "/orders/904837e3-3b76-47ec-b432-046db621571b")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .with_status(204)
             .with_body(
                 r#"{

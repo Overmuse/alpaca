@@ -30,6 +30,8 @@ mod test {
     #[tokio::test]
     async fn test_get_clock() {
         let _m = mock("GET", "/clock")
+            .match_header("apca-api-key-id", "APCA_API_KEY_ID")
+            .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .with_body(
                 r#"{
                     "timestamp": "2018-04-01T12:00:00.000Z",
@@ -46,6 +48,6 @@ mod test {
         )
         .unwrap();
 
-        client.send(GetClock {}).await.unwrap();
+        client.send(GetClock).await.unwrap();
     }
 }
