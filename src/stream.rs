@@ -100,3 +100,9 @@ pub enum AlpacaMessage {
         cash_withdrawable: f64,
     },
 }
+
+//#[cfg(test)]
+//mod test {
+//    use super::*;
+//    use mockito::mock;
+//}

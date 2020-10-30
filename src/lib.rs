@@ -99,6 +99,7 @@ impl Client {
     /// - `APCA_API_SECRET_KEY`
     pub fn from_env() -> Result<Self> {
         let url = env::var("APCA_API_BASE_URL")?;
+        println!("{:?}", &url);
         let key_id = env::var("APCA_API_KEY_ID")?;
         let secret_key = env::var("APCA_API_SECRET_KEY")?;
         Self::new(url, key_id, secret_key)
@@ -109,13 +110,13 @@ impl Client {
         let endpoint = endpoint.trim_matches('/');
         let url = format!("{}/{}", self.url, endpoint);
 
-        self.inner
+        let res = self
+            .inner
             .request(R::METHOD, &url)
             .headers(request.headers())
             .apca_body(request.body())
             .send()
-            .and_then(|res| res.json())
-            .map_err(From::from)
-            .await
+            .await?;
+        res.error_for_status()?.json().map_err(From::from).await
     }
 }

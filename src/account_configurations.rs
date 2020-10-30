@@ -71,7 +71,7 @@ impl Request for PatchAccountConfigurations {
 mod test {
     use super::*;
     use crate::Client;
-    use mockito::{mock, Matcher};
+    use mockito::mock;
 
     #[tokio::test]
     async fn test_get_account_configurations() {
