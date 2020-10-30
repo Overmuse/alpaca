@@ -1,4 +1,4 @@
-use crate::errors::Result;
+use crate::errors::{Error, Result};
 use futures::future::TryFutureExt;
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
@@ -117,6 +117,13 @@ impl Client {
             .apca_body(request.body())
             .send()
             .await?;
-        res.error_for_status()?.json().map_err(From::from).await
+        let status = res.status();
+        if status.is_success() {
+            res.json().map_err(From::from).await
+        } else if status.is_client_error() {
+            Err(Error::ClientError(status, res.text().await?))
+        } else {
+            Err(Error::ServerError(status, res.text().await?))
+        }
     }
 }

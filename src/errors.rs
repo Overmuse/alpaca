@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum AlpacaError {
+pub enum Error {
     #[error("Missing environment variable: {0}")]
     MissingEnv(#[from] std::env::VarError),
 
@@ -20,4 +20,4 @@ pub enum AlpacaError {
     //Unknown,
 }
 
-pub type Result<T> = std::result::Result<T, AlpacaError>;
+pub type Result<T> = std::result::Result<T, Error>;
