@@ -69,6 +69,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check, test, fmt, clippy]
     steps:
+      - run: sudo apt install && 
+          libcurl4-openssl-dev &&
+          libelf-dev && 
+          libdw-dev &&
+          cmake && 
+          gcc && 
+          binutils-dev && 
+          libiberty-dev
       - run: wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
           tar xzf master.tar.gz &&
           cd kcov-master &&
