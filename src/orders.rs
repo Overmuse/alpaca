@@ -416,6 +416,30 @@ mod tests {
     use mockito::{mock, Matcher};
 
     #[test]
+    fn test_defaults() {
+        match OrderType::default() {
+            OrderType::Market => {} // Happy case
+            _ => panic!(),
+        };
+        match TimeInForce::default() {
+            TimeInForce::DAY => {} // Happy case
+            _ => panic!(),
+        };
+        match OrderClass::default() {
+            OrderClass::Simple => {} // Happy case
+            _ => panic!(),
+        };
+        match OrderStatus::default() {
+            OrderStatus::New => {} // Happy case
+            _ => panic!(),
+        };
+        match Side::default() {
+            Side::Buy => {} // Happy case
+            _ => panic!(),
+        };
+    }
+
+    #[test]
     fn serde() {
         let json = r#"{
             "symbol":"AAPL",

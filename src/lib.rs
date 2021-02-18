@@ -15,6 +15,7 @@ pub mod assets;
 pub mod calendar;
 pub mod clock;
 pub mod errors;
+pub mod history;
 pub mod orders;
 pub mod positions;
 pub mod stream;
@@ -125,5 +126,20 @@ impl Client {
         } else {
             Err(Error::ServerError(status, res.text().await?))
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::env;
+
+    #[test]
+    fn test_from_env() {
+        env::set_var("APCA_API_BASE_URL", "URL");
+        env::set_var("APCA_API_KEY_ID", "KEY_ID");
+        env::set_var("APCA_API_SECRET_KEY", "SECRET_KEY");
+
+        Client::from_env().unwrap();
     }
 }
