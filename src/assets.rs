@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
+#[non_exhaustive]
 pub enum AssetClass {
     UsEquity,
 }
@@ -91,6 +92,13 @@ mod test {
     use super::*;
     use crate::Client;
     use mockito::{mock, Matcher};
+
+    #[test]
+    fn test_default_assetclass() {
+        match AssetClass::default() {
+            AssetClass::UsEquity => {} // Happy case
+        }
+    }
 
     #[tokio::test]
     async fn test_get_assets() {

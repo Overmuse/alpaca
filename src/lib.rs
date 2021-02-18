@@ -127,3 +127,18 @@ impl Client {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::env;
+
+    #[test]
+    fn test_from_env() {
+        env::set_var("APCA_API_BASE_URL", "URL");
+        env::set_var("APCA_API_KEY_ID", "KEY_ID");
+        env::set_var("APCA_API_SECRET_KEY", "SECRET_KEY");
+
+        Client::from_env().unwrap();
+    }
+}
