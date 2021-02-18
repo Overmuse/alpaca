@@ -15,7 +15,6 @@ pub mod assets;
 pub mod calendar;
 pub mod clock;
 pub mod errors;
-pub mod history;
 pub mod orders;
 pub mod positions;
 pub mod stream;
