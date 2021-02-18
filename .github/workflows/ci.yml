@@ -37,10 +37,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install tarpaulin
+      - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - name: Install tarpaulin
         run: cargo install cargo-tarpaulin
       - name: Generate coverage
         run: cargo tarpaulin --out Xml
