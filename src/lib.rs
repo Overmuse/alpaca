@@ -99,7 +99,6 @@ impl Client {
     /// - `APCA_API_SECRET_KEY`
     pub fn from_env() -> Result<Self> {
         let url = env::var("APCA_API_BASE_URL")?;
-        println!("{:?}", &url);
         let key_id = env::var("APCA_API_KEY_ID")?;
         let secret_key = env::var("APCA_API_SECRET_KEY")?;
         Self::new(url, key_id, secret_key)
