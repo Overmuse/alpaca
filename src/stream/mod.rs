@@ -89,7 +89,7 @@ impl Connection {
         if let AlpacaMessage::Authorization { status, action } = parsed {
             if let AuthorizationStatus::Authorized = status {
             } else {
-                return Err(Error::ConnectionFailure(action.clone()));
+                return Err(Error::ConnectionFailure(action));
             }
         }
         ws.subscribe(self.events).await?;
