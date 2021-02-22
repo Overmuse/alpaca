@@ -67,9 +67,9 @@ pub struct Connection {
 }
 
 impl Connection {
-    pub fn new(key_id: String, secret_key: String, events: Vec<String>) -> Self {
+    pub fn new(url: String, key_id: String, secret_key: String, events: Vec<String>) -> Self {
         Self {
-            url: "wss://alpaca.socket.polygon.io/stocks".to_string(),
+            url,
             key_id,
             secret_key,
             events,
