@@ -83,6 +83,7 @@ impl Connection {
         };
         let (client, _) = connect_async(&self.url).await?;
         let mut ws = WebSocket { inner: client };
+        let _parsed = ws.read_message().await?;
         ws.send_message(&serde_json::to_string(&auth_message)?)
             .await?;
         let parsed = ws.read_message().await?;
