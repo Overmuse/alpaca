@@ -101,8 +101,16 @@ pub enum AlpacaMessage {
     },
 }
 
-//#[cfg(test)]
-//mod test {
-//    use super::*;
-//    use mockito::mock;
-//}
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn serde_listen() {
+        let serialized = serde_json::to_string(&AlpacaAction::Listen {
+            streams: vec!["trade_updates".into(), "account_updates".into()],
+        })
+        .unwrap();
+        assert_eq!(serialized, "{\"action\":\"listen\",\"data\":{\"streams\":[\"trade_updates\",\"account_updates\"]}}");
+    }
+}

@@ -1,5 +1,6 @@
 use crate::errors::{Error, Result};
 use futures::{ready, SinkExt, Stream, StreamExt};
+use log::{debug, info};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::net::TcpStream;
@@ -20,9 +21,9 @@ impl Stream for WebSocket {
         match ready!(Pin::new(&mut self.inner).poll_next(cx)) {
             Some(Ok(item)) => {
                 match item {
-                    Message::Text(txt) => {
+                    Message::Binary(bits) => {
                         let parsed: Result<AlpacaMessage> =
-                            serde_json::from_str(&txt).map_err(Error::from);
+                            serde_json::from_slice(&bits).map_err(Error::from);
                         Poll::Ready(Some(parsed))
                     }
                     _ => {
@@ -53,8 +54,11 @@ impl WebSocket {
     pub async fn subscribe(&mut self, events: Vec<String>) -> Result<()> {
         let subscription_message = AlpacaAction::Listen { streams: events };
 
+        debug!("subscription message: {:?}", &subscription_message);
         self.send_message(&serde_json::to_string(&subscription_message)?)
             .await?;
+        let parsed = self.read_message().await?;
+        debug!("Subscription reply: {:?}", &parsed);
         Ok(())
     }
 }
@@ -77,18 +81,19 @@ impl Connection {
     }
 
     pub async fn connect(self) -> Result<WebSocket> {
+        let (client, _) = connect_async(&self.url).await?;
+        let mut ws = WebSocket { inner: client };
         let auth_message = AlpacaAction::Authenticate {
             key_id: self.key_id.clone(),
             secret_key: self.secret_key.clone(),
         };
-        let (client, _) = connect_async(&self.url).await?;
-        let mut ws = WebSocket { inner: client };
-        let _parsed = ws.read_message().await?;
         ws.send_message(&serde_json::to_string(&auth_message)?)
             .await?;
         let parsed = ws.read_message().await?;
+        debug!("{:?}", &parsed);
         if let AlpacaMessage::Authorization { status, action } = parsed {
             if let AuthorizationStatus::Authorized = status {
+                info!("Authorization successful");
             } else {
                 return Err(Error::ConnectionFailure(action));
             }
@@ -97,6 +102,3 @@ impl Connection {
         Ok(ws)
     }
 }
-
-#[cfg(test)]
-mod test {}
