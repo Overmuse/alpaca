@@ -3,7 +3,7 @@ use crate::utils::from_str;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum AlpacaData {
     #[serde(rename = "streams")]
     Streams(Vec<String>),
@@ -11,7 +11,7 @@ pub enum AlpacaData {
     Auth { key_id: String, secret_key: String },
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(tag = "action", content = "data")]
 pub enum AlpacaAction {
     #[serde(rename = "listen")]
@@ -20,7 +20,7 @@ pub enum AlpacaAction {
     Authenticate { key_id: String, secret_key: String },
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(tag = "event", rename_all = "snake_case")]
 pub enum Event {
     Calculated,
@@ -61,7 +61,7 @@ pub enum Event {
     Suspended,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct OrderEvent {
     #[serde(flatten)]
@@ -69,14 +69,14 @@ pub struct OrderEvent {
     pub order: Order,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum AuthorizationStatus {
     Authorized,
     Unauthorized,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(tag = "stream", content = "data", rename_all = "snake_case")]
 pub enum AlpacaMessage {
     Authorization {
