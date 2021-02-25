@@ -102,3 +102,90 @@ impl Connection {
         Ok(ws)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Connection;
+    use futures::{SinkExt, StreamExt};
+    use tokio::{
+        io::{AsyncRead, AsyncWrite},
+        net::TcpListener,
+    };
+    use tokio_tungstenite::tungstenite::Message;
+    use tokio_tungstenite::{accept_async, WebSocketStream};
+
+    async fn run_connection<S>(connection: WebSocketStream<S>)
+    where
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        let mut connection = connection;
+        let auth_request = connection.next().await.unwrap().unwrap();
+        assert_eq!(
+            auth_request,
+            Message::Text(
+                r#"{"action":"authenticate","data":{"key_id":"key","secret_key":"secret"}}"#.into()
+            )
+        );
+        let auth_response = Message::Text(
+            r#"{"stream":"authorization","data":{"status":"authorized","action":"authenticate"}}"#
+                .into(),
+        );
+        connection
+            .send(auth_response)
+            .await
+            .expect("Failed to send auth_response");
+        let subscription_request = connection.next().await.unwrap().unwrap();
+        assert_eq!(
+            subscription_request,
+            Message::Text(
+                r#"{"action":"listen","data":{"streams":["account_updates","trade_updates"]}}"#
+                    .into()
+            )
+        );
+        let subscription_response =
+            r#"{"stream":"listening","data":{"streams":["account_updates","trade_updates"]}}"#;
+        connection
+            .send(Message::Text(subscription_response.into()))
+            .await
+            .expect("Failed to send subscription response");
+        // TODO: Send account and trade update messages
+        //let account_update_message =
+        //    r#"{"stream":"listening","data":{"streams":["account_updates","trade_updates"]}}"#;
+        //connection
+        //    .send(Message::Text(subscription_response.into()))
+        //    .await
+        //    .expect("Failed to send subscription response");
+        //let trade_update_message =
+        //    r#"{"stream":"listening","data":{"streams":["account_updates","trade_updates"]}}"#;
+        //connection
+        //    .send(Message::Text(subscription_response.into()))
+        //    .await
+        //    .expect("Failed to send subscription response");
+    }
+
+    #[tokio::test]
+    async fn test_connection() {
+        let (con_tx, con_rx) = futures_channel::oneshot::channel();
+        tokio::spawn(async move {
+            let listener = TcpListener::bind("127.0.0.1:12345").await.unwrap();
+            // Send message when server is ready to start the test
+            con_tx.send(()).unwrap();
+            let (connection, _) = listener.accept().await.expect("No connections to accept");
+            let stream = accept_async(connection).await;
+            let stream = stream.expect("Failed to handshake with connection");
+            run_connection(stream).await;
+        });
+
+        con_rx.await.expect("Server not ready");
+        let connection = Connection::new(
+            "ws://localhost:12345".into(),
+            "key".into(),
+            "secret".into(),
+            vec!["account_updates".into(), "trade_updates".into()],
+        );
+
+        let _ws = connection.connect().await.unwrap();
+        //let account_update_message = ws.next().await.unwrap();
+        //let trade_update_message = ws.next().await.unwrap();
+    }
+}
