@@ -1,4 +1,4 @@
-use crate::orders::Order;
+use crate::common::Order;
 use crate::utils::from_str;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
