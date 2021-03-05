@@ -1,43 +1,11 @@
+use crate::common::{Order, OrderClass, OrderType, Side, TimeInForce};
 use crate::utils::*;
 use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Cow;
-use std::ops::Neg;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum OrderType {
-    Market,
-    Limit {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        limit_price: f64,
-    },
-    Stop {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        stop_price: f64,
-    },
-    StopLimit {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        limit_price: f64,
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        stop_price: f64,
-    },
-    TrailingStop {
-        #[serde(
-            deserialize_with = "from_str_optional",
-            serialize_with = "to_string_optional"
-        )]
-        trail_price: Option<f64>,
-        #[serde(
-            deserialize_with = "from_str_optional",
-            serialize_with = "to_string_optional"
-        )]
-        trail_percent: Option<f64>,
-    },
-}
 
 impl Default for OrderType {
     fn default() -> Self {
@@ -46,112 +14,26 @@ impl Default for OrderType {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "lowercase")]
-pub enum TimeInForce {
-    DAY,
-    GTC,
-    OPG,
-    CLS,
-    IOC,
-    FOK,
-}
-
-impl Default for TimeInForce {
-    fn default() -> Self {
-        TimeInForce::DAY
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct TakeProfitSpec {
-    pub limit_price: f32,
+pub enum AmountSpec {
+    #[serde(
+        rename = "qty",
+        deserialize_with = "from_str",
+        serialize_with = "to_string"
+    )]
+    Quantity(f64),
+    #[serde(
+        rename = "notional",
+        deserialize_with = "from_str",
+        serialize_with = "to_string"
+    )]
+    Notional(f64),
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct StopLossSpec {
-    pub stop_price: f32,
-    pub limit_price: f32,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "lowercase")]
-pub enum OrderClass {
-    Simple,
-    Bracket {
-        take_profit: TakeProfitSpec,
-        stop_loss: StopLossSpec,
-    },
-    OCO {
-        take_ptofit: TakeProfitSpec,
-        stop_loss: StopLossSpec,
-    },
-    OTO {
-        stop_loss: StopLossSpec,
-    },
-}
-
-impl Default for OrderClass {
-    fn default() -> Self {
-        OrderClass::Simple
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
-pub enum OrderStatus {
-    Accepted,
-    AcceptedForBidding,
-    Calculated,
-    Canceled,
-    DoneForDay,
-    Expired,
-    Filled,
-    New,
-    PartiallyFilled,
-    PendingCancel,
-    PendingNew,
-    PendingReplace,
-    Rejected,
-    Replaced,
-    Stopped,
-    Suspended,
-}
-
-impl Default for OrderStatus {
-    fn default() -> OrderStatus {
-        OrderStatus::New
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
-pub enum Side {
-    Buy,
-    Sell,
-}
-
-impl Default for Side {
-    fn default() -> Side {
-        Side::Buy
-    }
-}
-
-impl Neg for Side {
-    type Output = Side;
-
-    fn neg(self) -> Self::Output {
-        match self {
-            Side::Buy => Side::Sell,
-            Side::Sell => Side::Buy,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone)]
 pub struct OrderIntent {
     pub symbol: String,
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-    pub qty: u32,
+    #[serde(flatten)]
+    pub amount: AmountSpec,
     pub side: Side,
     #[serde(flatten, rename(serialize = "type"))]
     pub order_type: OrderType,
@@ -165,12 +47,23 @@ impl OrderIntent {
     pub fn new(symbol: &str) -> Self {
         OrderIntent {
             symbol: symbol.to_string(),
-            ..Default::default()
+            amount: AmountSpec::Quantity(1.0),
+            side: Side::Buy,
+            order_type: OrderType::Market,
+            time_in_force: TimeInForce::GTC,
+            extended_hours: false,
+            client_order_id: None,
+            order_class: OrderClass::Simple,
         }
     }
 
-    pub fn qty(mut self, qty: u32) -> Self {
-        self.qty = qty;
+    pub fn qty(mut self, qty: f64) -> Self {
+        self.amount = AmountSpec::Quantity(qty);
+        self
+    }
+
+    pub fn notional(mut self, notional: f64) -> Self {
+        self.amount = AmountSpec::Notional(notional);
         self
     }
 
@@ -203,46 +96,6 @@ impl OrderIntent {
         self.order_class = order_class;
         self
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct Order {
-    pub id: Uuid,
-    pub client_order_id: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: Option<DateTime<Utc>>,
-    pub submitted_at: Option<DateTime<Utc>>,
-    pub filled_at: Option<DateTime<Utc>>,
-    pub expired_at: Option<DateTime<Utc>>,
-    pub canceled_at: Option<DateTime<Utc>>,
-    pub failed_at: Option<DateTime<Utc>>,
-    pub replaced_at: Option<DateTime<Utc>>,
-    pub replaced_by: Option<Uuid>,
-    pub replaces: Option<Uuid>,
-    pub asset_id: Uuid,
-    pub symbol: String,
-    pub asset_class: String,
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-    pub qty: u32,
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-    pub filled_qty: u32,
-    #[serde(flatten, rename(serialize = "type"))]
-    pub order_type: OrderType,
-    pub side: Side,
-    pub time_in_force: TimeInForce,
-    #[serde(
-        deserialize_with = "from_str_optional",
-        serialize_with = "to_string_optional"
-    )]
-    pub filled_avg_price: Option<f64>,
-    pub status: OrderStatus,
-    pub extended_hours: bool,
-    pub legs: Option<Vec<Order>>,
-    #[serde(
-        deserialize_with = "from_str_optional",
-        serialize_with = "to_string_optional"
-    )]
-    pub hwm: Option<f64>,
 }
 
 #[derive(Serialize)]
@@ -429,10 +282,6 @@ mod tests {
             OrderClass::Simple => {} // Happy case
             _ => panic!(),
         };
-        match OrderStatus::default() {
-            OrderStatus::New => {} // Happy case
-            _ => panic!(),
-        };
         match Side::default() {
             Side::Buy => {} // Happy case
             _ => panic!(),
@@ -443,7 +292,7 @@ mod tests {
     fn serde() {
         let json = r#"{
             "symbol":"AAPL",
-            "qty":"1",
+            "notional":"1.23",
             "side":"buy",
             "type":"limit",
             "limit_price":"100",

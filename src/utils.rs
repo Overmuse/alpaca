@@ -1,3 +1,4 @@
+#[cfg(feature = "rest")]
 use chrono::NaiveTime;
 use log::warn;
 use serde::de::{self, Deserialize, Deserializer};
@@ -6,6 +7,7 @@ use serde_json::Value;
 use std::fmt::Display;
 use std::str::FromStr;
 
+#[cfg(feature = "rest")]
 pub fn hm_from_str<'de, D>(deserializer: D) -> Result<NaiveTime, D::Error>
 where
     D: Deserializer<'de>,
@@ -14,6 +16,7 @@ where
     NaiveTime::parse_from_str(&s, "%H:%M").map_err(de::Error::custom)
 }
 
+#[cfg(feature = "rest")]
 pub fn hm_to_string<S>(value: &NaiveTime, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,

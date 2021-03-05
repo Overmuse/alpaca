@@ -1,3 +1,4 @@
+pub mod common;
 pub mod errors;
 #[cfg(feature = "rest")]
 pub mod rest;
