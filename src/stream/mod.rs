@@ -41,7 +41,7 @@ impl Stream for WebSocket {
 
 impl WebSocket {
     async fn send_message(&mut self, msg: &str) -> Result<()> {
-        self.inner.send(Message::Text(msg.to_string())).await?;
+        self.inner.send(Message::text(msg)).await?;
         Ok(())
     }
 
@@ -122,13 +122,12 @@ mod test {
         let auth_request = connection.next().await.unwrap().unwrap();
         assert_eq!(
             auth_request,
-            Message::Text(
-                r#"{"action":"authenticate","data":{"key_id":"key","secret_key":"secret"}}"#.into()
+            Message::text(
+                r#"{"action":"authenticate","data":{"key_id":"key","secret_key":"secret"}}"#
             )
         );
-        let auth_response = Message::Text(
-            r#"{"stream":"authorization","data":{"status":"authorized","action":"authenticate"}}"#
-                .into(),
+        let auth_response = Message::text(
+            r#"{"stream":"authorization","data":{"status":"authorized","action":"authenticate"}}"#,
         );
         connection
             .send(auth_response)
@@ -137,28 +136,27 @@ mod test {
         let subscription_request = connection.next().await.unwrap().unwrap();
         assert_eq!(
             subscription_request,
-            Message::Text(
+            Message::text(
                 r#"{"action":"listen","data":{"streams":["account_updates","trade_updates"]}}"#
-                    .into()
             )
         );
         let subscription_response =
             r#"{"stream":"listening","data":{"streams":["account_updates","trade_updates"]}}"#;
         connection
-            .send(Message::Text(subscription_response.into()))
+            .send(Message::text(subscription_response))
             .await
             .expect("Failed to send subscription response");
         // TODO: Send account and trade update messages
         //let account_update_message =
         //    r#"{"stream":"listening","data":{"streams":["account_updates","trade_updates"]}}"#;
         //connection
-        //    .send(Message::Text(subscription_response.into()))
+        //    .send(Message::text(subscription_response))
         //    .await
         //    .expect("Failed to send subscription response");
         //let trade_update_message =
         //    r#"{"stream":"listening","data":{"streams":["account_updates","trade_updates"]}}"#;
         //connection
-        //    .send(Message::Text(subscription_response.into()))
+        //    .send(Message::text(subscription_response))
         //    .await
         //    .expect("Failed to send subscription response");
     }
