@@ -154,10 +154,18 @@ pub struct Order {
     pub asset_id: Uuid,
     pub symbol: String,
     pub asset_class: String,
+    #[cfg(feature = "fractional-shares")]
     #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
     pub qty: f64,
+    #[cfg(not(feature = "fractional-shares"))]
+    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+    pub qty: usize,
+    #[cfg(feature = "fractional-shares")]
     #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
     pub filled_qty: f64,
+    #[cfg(not(feature = "fractional-shares"))]
+    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+    pub filled_qty: usize,
     #[serde(flatten, rename(serialize = "type"))]
     pub order_type: OrderType,
     pub side: Side,

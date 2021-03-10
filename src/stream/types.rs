@@ -33,20 +33,22 @@ pub enum Event {
     },
     Fill {
         timestamp: DateTime<Utc>,
-        #[serde(deserialize_with = "from_str")]
         price: f64,
-        #[serde(deserialize_with = "from_str")]
-        qty: u32,
+        #[cfg(feature = "fractional-shares")]
+        qty: f64,
+        #[cfg(not(feature = "fractional-shares"))]
+        qty: usize,
     },
     New,
     OrderCancelRejected,
     OrderReplaceRejected,
     PartialFill {
         timestamp: DateTime<Utc>,
-        #[serde(deserialize_with = "from_str")]
         price: f64,
-        #[serde(deserialize_with = "from_str")]
-        qty: u32,
+        #[cfg(feature = "fractional-shares")]
+        qty: f64,
+        #[cfg(not(feature = "fractional-shares"))]
+        qty: usize,
     },
     PendingCancel,
     PendingNew,
