@@ -32,8 +32,12 @@ pub enum AmountSpec {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct OrderIntent {
     pub symbol: String,
+    #[cfg(feature = "fractional-shares")]
     #[serde(flatten)]
     pub amount: AmountSpec,
+    #[cfg(not(feature = "fractional-shares"))]
+    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+    pub qty: usize,
     pub side: Side,
     #[serde(flatten, rename(serialize = "type"))]
     pub order_type: OrderType,
@@ -47,7 +51,10 @@ impl OrderIntent {
     pub fn new(symbol: &str) -> Self {
         OrderIntent {
             symbol: symbol.to_string(),
+            #[cfg(feature = "fractional-shares")]
             amount: AmountSpec::Quantity(1.0),
+            #[cfg(not(feature = "fractional-shares"))]
+            qty: 1,
             side: Side::Buy,
             order_type: OrderType::Market,
             time_in_force: TimeInForce::GTC,
@@ -57,11 +64,18 @@ impl OrderIntent {
         }
     }
 
+    #[cfg(feature = "fractional-shares")]
     pub fn qty(mut self, qty: f64) -> Self {
         self.amount = AmountSpec::Quantity(qty);
         self
     }
 
+    #[cfg(not(feature = "fractional-shares"))]
+    pub fn qty(mut self, qty: usize) -> Self {
+        self.qty = qty;
+        self
+    }
+    #[cfg(feature = "fractional-shares")]
     pub fn notional(mut self, notional: f64) -> Self {
         self.amount = AmountSpec::Notional(notional);
         self

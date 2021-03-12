@@ -25,6 +25,7 @@ mockito = "0.27"
 tokio = {version = "1.0", default-features = false, features = ["macros", "rt-multi-thread"]}
 
 [features]
-default = ["rest", "ws"]
+default = ["rest", "ws", "fractional-shares"]
+fractional-shares = []
 rest = ["reqwest"]
 ws = ["tokio-tungstenite", "tokio/net"]
