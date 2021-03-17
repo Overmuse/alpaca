@@ -1,5 +1,5 @@
 use crate::errors::{Error, Result};
-use futures::{ready, SinkExt, Stream, StreamExt};
+use futures::{ready, Sink, SinkExt, Stream, StreamExt};
 use log::{debug, info};
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -26,6 +26,11 @@ impl Stream for WebSocket {
                             serde_json::from_slice(&bits).map_err(Error::from);
                         Poll::Ready(Some(parsed))
                     }
+                    Message::Text(txt) => {
+                        let parsed: Result<AlpacaMessage> =
+                            serde_json::from_str(&txt).map_err(Error::from);
+                        Poll::Ready(Some(parsed))
+                    }
                     _ => {
                         // Non Text message received, immediately schedule re-poll
                         cx.waker().wake_by_ref();
@@ -39,25 +44,42 @@ impl Stream for WebSocket {
     }
 }
 
+impl<T: Into<String>> Sink<T> for WebSocket {
+    type Error = Error;
+
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<()>> {
+        Pin::new(&mut self.inner)
+            .poll_ready(cx)
+            .map_err(Error::from)
+    }
+
+    fn start_send(mut self: Pin<&mut Self>, item: T) -> Result<()> {
+        Pin::new(&mut self.inner)
+            .start_send(Message::text(item))
+            .map_err(Error::from)
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<()>> {
+        Pin::new(&mut self.inner)
+            .poll_flush(cx)
+            .map_err(Error::from)
+    }
+
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<()>> {
+        Pin::new(&mut self.inner)
+            .poll_close(cx)
+            .map_err(Error::from)
+    }
+}
+
 impl WebSocket {
-    async fn send_message(&mut self, msg: &str) -> Result<()> {
-        self.inner.send(Message::text(msg)).await?;
-        Ok(())
-    }
-
-    async fn read_message(&mut self) -> Result<AlpacaMessage> {
-        let resp = self.inner.next().await.ok_or(Error::StreamClosed)??;
-        let parsed: AlpacaMessage = serde_json::from_str(resp.to_text()?)?;
-        Ok(parsed)
-    }
-
     pub async fn subscribe(&mut self, events: Vec<String>) -> Result<()> {
         let subscription_message = AlpacaAction::Listen { streams: events };
 
         debug!("subscription message: {:?}", &subscription_message);
-        self.send_message(&serde_json::to_string(&subscription_message)?)
+        self.send(&serde_json::to_string(&subscription_message)?)
             .await?;
-        let parsed = self.read_message().await?;
+        let parsed = self.next().await.ok_or(Error::StreamClosed)?;
         debug!("Subscription reply: {:?}", &parsed);
         Ok(())
     }
@@ -87,9 +109,8 @@ impl Connection {
             key_id: self.key_id.clone(),
             secret_key: self.secret_key.clone(),
         };
-        ws.send_message(&serde_json::to_string(&auth_message)?)
-            .await?;
-        let parsed = ws.read_message().await?;
+        ws.send(&serde_json::to_string(&auth_message)?).await?;
+        let parsed = ws.next().await.ok_or(Error::StreamClosed)??;
         debug!("{:?}", &parsed);
         if let AlpacaMessage::Authorization { status, action } = parsed {
             if let AuthorizationStatus::Authorized = status {
@@ -114,11 +135,10 @@ mod test {
     use tokio_tungstenite::tungstenite::Message;
     use tokio_tungstenite::{accept_async, WebSocketStream};
 
-    async fn run_connection<S>(connection: WebSocketStream<S>)
+    async fn run_connection<S>(mut connection: WebSocketStream<S>)
     where
         S: AsyncRead + AsyncWrite + Unpin,
     {
-        let mut connection = connection;
         let auth_request = connection.next().await.unwrap().unwrap();
         assert_eq!(
             auth_request,

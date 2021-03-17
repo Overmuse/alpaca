@@ -38,6 +38,7 @@ pub enum OrderType {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
+#[allow(clippy::upper_case_acronyms)]
 pub enum TimeInForce {
     DAY,
     GTC,
@@ -66,6 +67,7 @@ pub struct StopLossSpec {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
+#[allow(clippy::upper_case_acronyms)]
 pub enum OrderClass {
     Simple,
     Bracket {
