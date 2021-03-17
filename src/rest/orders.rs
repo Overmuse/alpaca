@@ -57,7 +57,7 @@ impl OrderIntent {
             qty: 1,
             side: Side::Buy,
             order_type: OrderType::Market,
-            time_in_force: TimeInForce::GTC,
+            time_in_force: TimeInForce::GoodTilCancelled,
             extended_hours: false,
             client_order_id: None,
             order_class: OrderClass::Simple,
@@ -289,7 +289,7 @@ mod tests {
             _ => panic!(),
         };
         match TimeInForce::default() {
-            TimeInForce::DAY => {} // Happy case
+            TimeInForce::Day => {} // Happy case
             _ => panic!(),
         };
         match OrderClass::default() {

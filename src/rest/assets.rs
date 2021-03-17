@@ -16,14 +16,15 @@ impl Default for AssetClass {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum Exchange {
-    AMEX,
-    ARCA,
-    BATS,
-    NYSE,
-    NASDAQ,
-    NYSEARCA,
-    OTC,
+    Amex,
+    Arca,
+    Bats,
+    Nyse,
+    Nasdaq,
+    NyseArca,
+    Otc,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
