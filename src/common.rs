@@ -37,20 +37,24 @@ pub enum OrderType {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "lowercase")]
-#[allow(clippy::upper_case_acronyms)]
 pub enum TimeInForce {
-    DAY,
-    GTC,
-    OPG,
-    CLS,
-    IOC,
-    FOK,
+    #[serde(rename = "day")]
+    Day,
+    #[serde(rename = "gtc")]
+    GoodTilCancelled,
+    #[serde(rename = "opg")]
+    Open,
+    #[serde(rename = "cls")]
+    Close,
+    #[serde(rename = "ioc")]
+    ImmediateOrCancel,
+    #[serde(rename = "fok")]
+    FillOrKill,
 }
 
 impl Default for TimeInForce {
     fn default() -> Self {
-        TimeInForce::DAY
+        TimeInForce::Day
     }
 }
 
@@ -67,18 +71,17 @@ pub struct StopLossSpec {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
-#[allow(clippy::upper_case_acronyms)]
 pub enum OrderClass {
     Simple,
     Bracket {
         take_profit: TakeProfitSpec,
         stop_loss: StopLossSpec,
     },
-    OCO {
+    OneCancelsOther {
         take_ptofit: TakeProfitSpec,
         stop_loss: StopLossSpec,
     },
-    OTO {
+    OneTriggersOther {
         stop_loss: StopLossSpec,
     },
 }
