@@ -302,11 +302,40 @@ mod tests {
         };
     }
 
+    #[cfg(feature = "fractional-shares")]
     #[test]
     fn serde() {
         let json = r#"{
             "symbol":"AAPL",
             "notional":"1.23",
+            "side":"buy",
+            "type":"limit",
+            "limit_price":"100",
+            "time_in_force":"gtc",
+            "extended_hours":false,
+            "client_order_id":"TEST",
+            "order_class":{
+                "bracket":{
+                    "take_profit":{
+                        "limit_price":301.0
+                    },
+                    "stop_loss":{
+                        "stop_price":299.0,
+                        "limit_price":298.5
+                    }
+                }
+            }
+        }"#;
+        let deserialized: OrderIntent = serde_json::from_str(json).unwrap();
+        let _serialized = serde_json::to_string(&deserialized).unwrap();
+    }
+
+    #[cfg(not(feature = "fractional-shares"))]
+    #[test]
+    fn serde() {
+        let json = r#"{
+            "symbol":"AAPL",
+            "qty":"123",
             "side":"buy",
             "type":"limit",
             "limit_price":"100",
