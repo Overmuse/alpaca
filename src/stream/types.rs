@@ -37,7 +37,7 @@ pub enum Event {
         #[cfg(feature = "fractional-shares")]
         qty: f64,
         #[cfg(not(feature = "fractional-shares"))]
-        qty: usize,
+        qty: isize,
     },
     New,
     OrderCancelRejected,
@@ -48,7 +48,7 @@ pub enum Event {
         #[cfg(feature = "fractional-shares")]
         qty: f64,
         #[cfg(not(feature = "fractional-shares"))]
-        qty: usize,
+        qty: isize,
     },
     PendingCancel,
     PendingNew,
