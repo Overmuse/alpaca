@@ -159,9 +159,17 @@ pub struct Order {
     pub asset_id: Uuid,
     pub symbol: String,
     pub asset_class: String,
+    #[serde(
+        deserialize_with = "from_str_optional",
+        serialize_with = "to_string_optional"
+    )]
+    pub notional: Option<f64>,
     #[cfg(feature = "fractional-shares")]
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-    pub qty: f64,
+    #[serde(
+        deserialize_with = "from_str_optional",
+        serialize_with = "to_string_optional"
+    )]
+    pub qty: Option<f64>,
     #[cfg(not(feature = "fractional-shares"))]
     #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
     pub qty: usize,
@@ -171,15 +179,15 @@ pub struct Order {
     #[cfg(not(feature = "fractional-shares"))]
     #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
     pub filled_qty: usize,
-    #[serde(flatten, rename(serialize = "type"))]
-    pub order_type: OrderType,
-    pub side: Side,
-    pub time_in_force: TimeInForce,
     #[serde(
         deserialize_with = "from_str_optional",
         serialize_with = "to_string_optional"
     )]
     pub filled_avg_price: Option<f64>,
+    #[serde(flatten, rename(serialize = "type"))]
+    pub order_type: OrderType,
+    pub side: Side,
+    pub time_in_force: TimeInForce,
     pub status: OrderStatus,
     pub extended_hours: bool,
     pub legs: Option<Vec<Order>>,
