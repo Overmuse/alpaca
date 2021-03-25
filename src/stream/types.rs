@@ -40,7 +40,7 @@ pub enum Event {
         position_qty: f64,
         #[cfg(not(feature = "fractional-shares"))]
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        positition_qty: isize,
+        position_qty: isize,
     },
     New,
     OrderCancelRejected,
