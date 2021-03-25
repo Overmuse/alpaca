@@ -1,5 +1,5 @@
 use crate::common::Order;
-use crate::utils::from_str;
+use crate::utils::{from_str, to_string};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -32,23 +32,29 @@ pub enum Event {
         timestamp: DateTime<Utc>,
     },
     Fill {
-        timestamp: DateTime<Utc>,
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         price: f64,
+        timestamp: DateTime<Utc>,
         #[cfg(feature = "fractional-shares")]
-        qty: f64,
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+        position_qty: f64,
         #[cfg(not(feature = "fractional-shares"))]
-        qty: isize,
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+        positition_qty: isize,
     },
     New,
     OrderCancelRejected,
     OrderReplaceRejected,
     PartialFill {
-        timestamp: DateTime<Utc>,
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         price: f64,
+        timestamp: DateTime<Utc>,
         #[cfg(feature = "fractional-shares")]
-        qty: f64,
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+        position_qty: f64,
         #[cfg(not(feature = "fractional-shares"))]
-        qty: isize,
+        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+        position_qty: isize,
     },
     PendingCancel,
     PendingNew,
@@ -114,5 +120,12 @@ mod test {
         })
         .unwrap();
         assert_eq!(serialized, "{\"action\":\"listen\",\"data\":{\"streams\":[\"trade_updates\",\"account_updates\"]}}");
+    }
+
+    #[test]
+    fn serde_order_event() {
+        let json = r#"{"stream":"trade_updates","data":{"event":"fill","price":"179.08","timestamp":"2018-02-28T20:38:22Z","position_qty":"100","order":{"id":"61e69015-8549-4bfd-b9c3-01e75843f47d","client_order_id":"eb9e2aaa-f71a-4f51-b5b4-52a6c565dad4","created_at":"2021-03-16T18:38:01.942282Z","updated_at":"2021-03-16T18:38:01.942282Z","submitted_at":"2021-03-16T18:38:01.937734Z","filled_at":null,"expired_at":null,"canceled_at":null,"failed_at":null,"replaced_at":null,"replaced_by":null,"replaces":null,"asset_id":"b0b6dd9d-8b9b-48a9-ba46-b9d54906e415","symbol":"AAPL","asset_class":"us_equity","notional":"500","qty":null,"filled_qty":"0","filled_avg_price":null,"order_class":"","order_type":"market","type":"market","side":"buy","time_in_force":"day","limit_price":null,"stop_price":null,"status":"accepted","extended_hours":false,"legs":null,"trail_percent":null,"trail_price":null,"hwm":null}}}"#;
+        let deserialized: AlpacaMessage = serde_json::from_str(json).unwrap();
+        let _serialized = serde_json::to_string(&deserialized).unwrap();
     }
 }
