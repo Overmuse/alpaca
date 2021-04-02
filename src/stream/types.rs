@@ -84,6 +84,7 @@ pub enum AuthorizationStatus {
     Unauthorized,
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(tag = "stream", content = "data", rename_all = "snake_case")]
 pub enum AlpacaMessage {
@@ -94,7 +95,7 @@ pub enum AlpacaMessage {
     Listening {
         streams: Vec<String>,
     },
-    TradeUpdates(Box<OrderEvent>),
+    TradeUpdates(OrderEvent),
     AccountUpdates {
         id: String,
         created_at: String,
