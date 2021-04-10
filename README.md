@@ -1,0 +1,2 @@
+# alpaca
+`alpaca` is a rust library for working with the [alpaca](https://alpaca.markets/) brokerage. The `rest` feature enables strongly-typed interaction with alpaca's rest endpoints, with asynchronous communication and automatic serialization and deserialization to correct types. The `ws` feature enables asynchronous streaming of account- and trade-data from alpaca. Both features are enabled by default.
