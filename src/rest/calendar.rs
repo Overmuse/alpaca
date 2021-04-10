@@ -13,14 +13,24 @@ pub struct Calendar {
     pub close: NaiveTime,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct GetCalendar {
     start: NaiveDate,
     end: NaiveDate,
 }
 impl GetCalendar {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(start: NaiveDate, end: NaiveDate) -> Self {
+        Self { start, end }
+    }
+
+    pub fn start(mut self, date: NaiveDate) -> Self {
+        self.start = date;
+        self
+    }
+
+    pub fn end(mut self, date: NaiveDate) -> Self {
+        self.end = date;
+        self
     }
 }
 impl Default for GetCalendar {
@@ -51,6 +61,20 @@ mod test {
     use crate::Client;
     use mockito::{mock, Matcher};
 
+    #[test]
+    fn constructors() {
+        let cal1 = GetCalendar::default();
+        let cal2 = GetCalendar::new(
+            NaiveDate::from_ymd(1970, 1, 2),
+            NaiveDate::from_ymd(2029, 12, 30),
+        );
+
+        let cal1 = cal1
+            .start(NaiveDate::from_ymd(1970, 1, 2))
+            .end(NaiveDate::from_ymd(2029, 12, 30));
+        assert_eq!(cal1, cal2);
+    }
+
     #[tokio::test]
     async fn test_get_calendar() {
         let _m = mock("GET", "/calendar")
@@ -77,6 +101,6 @@ mod test {
         )
         .unwrap();
 
-        client.send(GetCalendar::new()).await.unwrap();
+        client.send(GetCalendar::default()).await.unwrap();
     }
 }
