@@ -145,7 +145,7 @@ impl Neg for Side {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Order {
     pub id: Uuid,
-    pub client_order_id: Option<String>,
+    pub client_order_id: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
     pub submitted_at: Option<DateTime<Utc>>,
