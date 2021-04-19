@@ -99,7 +99,6 @@ mod test {
 
     #[tokio::test]
     async fn test_patch_account_configurations() {
-        env_logger::init();
         let _m = mock("PATCH", "/account/configurations")
             .match_header("apca-api-key-id", "APCA_API_KEY_ID")
             .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")

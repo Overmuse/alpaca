@@ -1,5 +1,5 @@
-use crate::utils::{from_str, from_str_optional, to_string, to_string_optional};
 use chrono::prelude::*;
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::ops::Neg;
 use uuid::Uuid;
@@ -9,30 +9,18 @@ use uuid::Uuid;
 pub enum OrderType {
     Market,
     Limit {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        limit_price: f64,
+        limit_price: Decimal,
     },
     Stop {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        stop_price: f64,
+        stop_price: Decimal,
     },
     StopLimit {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        limit_price: f64,
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        stop_price: f64,
+        limit_price: Decimal,
+        stop_price: Decimal,
     },
     TrailingStop {
-        #[serde(
-            deserialize_with = "from_str_optional",
-            serialize_with = "to_string_optional"
-        )]
-        trail_price: Option<f64>,
-        #[serde(
-            deserialize_with = "from_str_optional",
-            serialize_with = "to_string_optional"
-        )]
-        trail_percent: Option<f64>,
+        trail_price: Option<Decimal>,
+        trail_percent: Option<Decimal>,
     },
 }
 
@@ -60,13 +48,13 @@ impl Default for TimeInForce {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct TakeProfitSpec {
-    pub limit_price: f32,
+    pub limit_price: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct StopLossSpec {
-    pub stop_price: f32,
-    pub limit_price: f32,
+    pub stop_price: Decimal,
+    pub limit_price: Decimal,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -142,6 +130,7 @@ impl Neg for Side {
         }
     }
 }
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Order {
     pub id: Uuid,
@@ -159,31 +148,24 @@ pub struct Order {
     pub asset_id: Uuid,
     pub symbol: String,
     pub asset_class: String,
-    #[serde(
-        deserialize_with = "from_str_optional",
-        serialize_with = "to_string_optional"
-    )]
-    pub notional: Option<f64>,
+    pub notional: Option<Decimal>,
     #[cfg(feature = "fractional-shares")]
-    #[serde(
-        deserialize_with = "from_str_optional",
-        serialize_with = "to_string_optional"
-    )]
-    pub qty: Option<f64>,
+    pub qty: Option<Decimal>,
     #[cfg(not(feature = "fractional-shares"))]
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+    #[serde(
+        deserialize_with = "crate::utils::from_str",
+        serialize_with = "crate::utils::to_string"
+    )]
     pub qty: usize,
     #[cfg(feature = "fractional-shares")]
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-    pub filled_qty: f64,
+    pub filled_qty: Decimal,
     #[cfg(not(feature = "fractional-shares"))]
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-    pub filled_qty: usize,
     #[serde(
-        deserialize_with = "from_str_optional",
-        serialize_with = "to_string_optional"
+        deserialize_with = "crate::utils::from_str",
+        serialize_with = "crate::utils::to_string"
     )]
-    pub filled_avg_price: Option<f64>,
+    pub filled_qty: usize,
+    pub filled_avg_price: Option<Decimal>,
     #[serde(flatten, rename(serialize = "type"))]
     pub order_type: OrderType,
     pub side: Side,
@@ -191,9 +173,5 @@ pub struct Order {
     pub status: OrderStatus,
     pub extended_hours: bool,
     pub legs: Option<Vec<Order>>,
-    #[serde(
-        deserialize_with = "from_str_optional",
-        serialize_with = "to_string_optional"
-    )]
-    pub hwm: Option<f64>,
+    pub hwm: Option<Decimal>,
 }

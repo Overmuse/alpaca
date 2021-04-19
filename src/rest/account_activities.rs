@@ -1,6 +1,7 @@
 use crate::utils::*;
 use crate::Request;
 use chrono::{DateTime, Utc};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -32,8 +33,7 @@ pub enum Activity {
         cum_qty: i32,
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         leaves_qty: i32,
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        price: f64,
+        price: Decimal,
         side: Side,
         symbol: String,
         transaction_time: DateTime<Utc>,
@@ -46,18 +46,14 @@ pub enum Activity {
         id: String,
         date: DateTime<Utc>,
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        net_amount: f64,
+        net_amount: Decimal,
         symbol: Option<String>,
         #[serde(
             deserialize_with = "from_str_optional",
             serialize_with = "to_string_optional"
         )]
         qty: Option<i32>,
-        #[serde(
-            deserialize_with = "from_str_optional",
-            serialize_with = "to_string_optional"
-        )]
-        per_share_amount: Option<f64>,
+        per_share_amount: Option<Decimal>,
     },
 }
 

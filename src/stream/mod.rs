@@ -1,11 +1,11 @@
 use crate::errors::{Error, Result};
 use futures::{ready, Sink, SinkExt, Stream, StreamExt};
-use log::{debug, info};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::net::TcpStream;
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
+use tracing::{debug, info};
 
 pub mod types;
 pub use types::*;
