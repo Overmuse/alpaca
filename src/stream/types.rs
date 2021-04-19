@@ -1,5 +1,4 @@
 use crate::common::Order;
-use crate::utils::{from_str, to_string};
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -38,7 +37,10 @@ pub enum Event {
         #[cfg(feature = "fractional-shares")]
         position_qty: Decimal,
         #[cfg(not(feature = "fractional-shares"))]
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+        #[serde(
+            deserialize_with = "crate::utils::from_str",
+            serialize_with = "crate::utils::to_string"
+        )]
         position_qty: isize,
     },
     New,
@@ -50,7 +52,10 @@ pub enum Event {
         #[cfg(feature = "fractional-shares")]
         position_qty: Decimal,
         #[cfg(not(feature = "fractional-shares"))]
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+        #[serde(
+            deserialize_with = "crate::utils::from_str",
+            serialize_with = "crate::utils::to_string"
+        )]
         position_qty: isize,
     },
     PendingCancel,

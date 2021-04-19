@@ -1,5 +1,4 @@
 use crate::common::{Order, OrderClass, OrderType, Side, TimeInForce};
-use crate::utils::*;
 use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
@@ -29,7 +28,10 @@ pub struct OrderIntent {
     #[serde(flatten)]
     pub amount: AmountSpec,
     #[cfg(not(feature = "fractional-shares"))]
-    #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
+    #[serde(
+        deserialize_with = "crate::utils::from_str",
+        serialize_with = "crate::utils::to_string"
+    )]
     pub qty: usize,
     pub side: Side,
     #[serde(flatten, rename(serialize = "type"))]
