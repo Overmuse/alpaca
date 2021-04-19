@@ -1,6 +1,6 @@
-use crate::utils::from_str;
 use crate::Request;
 use chrono::{DateTime, Utc};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -30,31 +30,19 @@ pub struct Account {
     account_blocked: bool,
     created_at: DateTime<Utc>,
     shorting_enabled: bool,
-    #[serde(deserialize_with = "from_str")]
-    long_market_value: f64,
-    #[serde(deserialize_with = "from_str")]
-    short_market_value: f64,
-    #[serde(deserialize_with = "from_str")]
-    equity: f64,
-    #[serde(deserialize_with = "from_str")]
-    last_equity: f64,
-    #[serde(deserialize_with = "from_str")]
-    multiplier: f64,
-    #[serde(deserialize_with = "from_str")]
-    buying_power: f64,
-    #[serde(deserialize_with = "from_str")]
-    initial_margin: f64,
-    #[serde(deserialize_with = "from_str")]
-    maintenance_margin: f64,
-    #[serde(deserialize_with = "from_str")]
-    sma: f64,
+    long_market_value: Decimal,
+    short_market_value: Decimal,
+    equity: Decimal,
+    last_equity: Decimal,
+    multiplier: Decimal,
+    buying_power: Decimal,
+    initial_margin: Decimal,
+    maintenance_margin: Decimal,
+    sma: Decimal,
     daytrade_count: u32,
-    #[serde(deserialize_with = "from_str")]
-    last_maintenance_margin: f64,
-    #[serde(deserialize_with = "from_str")]
-    daytrading_buying_power: f64,
-    #[serde(deserialize_with = "from_str")]
-    regt_buying_power: f64,
+    last_maintenance_margin: Decimal,
+    daytrading_buying_power: Decimal,
+    regt_buying_power: Decimal,
 }
 
 pub struct GetAccount;

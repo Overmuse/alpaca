@@ -1,6 +1,6 @@
-use crate::utils::from_str;
 use crate::Request;
 use reqwest::Method;
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -24,29 +24,22 @@ pub struct Position {
     pub symbol: String,
     pub exchange: String,
     pub asset_class: String,
-    #[serde(deserialize_with = "from_str")]
-    pub avg_entry_price: f64,
-    #[serde(deserialize_with = "from_str")]
+    pub avg_entry_price: Decimal,
+    #[serde(
+        deserialize_with = "crate::utils::from_str",
+        serialize_with = "crate::utils::to_string"
+    )]
     pub qty: i32,
     pub side: Side,
-    #[serde(deserialize_with = "from_str")]
-    pub market_value: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub cost_basis: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub unrealized_pl: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub unrealized_plpc: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub unrealized_intraday_pl: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub unrealized_intraday_plpc: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub current_price: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub lastday_price: f64,
-    #[serde(deserialize_with = "from_str")]
-    pub change_today: f64,
+    pub market_value: Decimal,
+    pub cost_basis: Decimal,
+    pub unrealized_pl: Decimal,
+    pub unrealized_plpc: Decimal,
+    pub unrealized_intraday_pl: Decimal,
+    pub unrealized_intraday_plpc: Decimal,
+    pub current_price: Decimal,
+    pub lastday_price: Decimal,
+    pub change_today: Decimal,
 }
 
 pub struct GetPositions;

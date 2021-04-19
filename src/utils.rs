@@ -1,11 +1,11 @@
 #[cfg(feature = "rest")]
 use chrono::NaiveTime;
-use log::warn;
 use serde::de::{self, Deserialize, Deserializer};
 use serde::ser::Serializer;
 use serde_json::Value;
 use std::fmt::Display;
 use std::str::FromStr;
+use tracing::warn;
 
 #[cfg(feature = "rest")]
 pub fn hm_from_str<'de, D>(deserializer: D) -> Result<NaiveTime, D::Error>

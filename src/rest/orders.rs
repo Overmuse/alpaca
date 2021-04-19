@@ -3,6 +3,7 @@ use crate::utils::*;
 use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
+use rust_decimal::Decimal;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -15,18 +16,10 @@ impl Default for OrderType {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum AmountSpec {
-    #[serde(
-        rename = "qty",
-        deserialize_with = "from_str",
-        serialize_with = "to_string"
-    )]
-    Quantity(f64),
-    #[serde(
-        rename = "notional",
-        deserialize_with = "from_str",
-        serialize_with = "to_string"
-    )]
-    Notional(f64),
+    #[serde(rename = "qty")]
+    Quantity(Decimal),
+    #[serde(rename = "notional")]
+    Notional(Decimal),
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -52,7 +45,7 @@ impl OrderIntent {
         OrderIntent {
             symbol: symbol.to_string(),
             #[cfg(feature = "fractional-shares")]
-            amount: AmountSpec::Quantity(1.0),
+            amount: AmountSpec::Quantity(Decimal::new(1, 0)),
             #[cfg(not(feature = "fractional-shares"))]
             qty: 1,
             side: Side::Buy,
@@ -65,7 +58,7 @@ impl OrderIntent {
     }
 
     #[cfg(feature = "fractional-shares")]
-    pub fn qty(mut self, qty: f64) -> Self {
+    pub fn qty(mut self, qty: Decimal) -> Self {
         self.amount = AmountSpec::Quantity(qty);
         self
     }
@@ -76,7 +69,7 @@ impl OrderIntent {
         self
     }
     #[cfg(feature = "fractional-shares")]
-    pub fn notional(mut self, notional: f64) -> Self {
+    pub fn notional(mut self, notional: Decimal) -> Self {
         self.amount = AmountSpec::Notional(notional);
         self
     }

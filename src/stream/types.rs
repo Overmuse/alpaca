@@ -1,6 +1,7 @@
 use crate::common::Order;
 use crate::utils::{from_str, to_string};
 use chrono::{DateTime, Utc};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -32,12 +33,10 @@ pub enum Event {
         timestamp: DateTime<Utc>,
     },
     Fill {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        price: f64,
+        price: Decimal,
         timestamp: DateTime<Utc>,
         #[cfg(feature = "fractional-shares")]
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        position_qty: f64,
+        position_qty: Decimal,
         #[cfg(not(feature = "fractional-shares"))]
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         position_qty: isize,
@@ -46,12 +45,10 @@ pub enum Event {
     OrderCancelRejected,
     OrderReplaceRejected,
     PartialFill {
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        price: f64,
+        price: Decimal,
         timestamp: DateTime<Utc>,
         #[cfg(feature = "fractional-shares")]
-        #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
-        position_qty: f64,
+        position_qty: Decimal,
         #[cfg(not(feature = "fractional-shares"))]
         #[serde(deserialize_with = "from_str", serialize_with = "to_string")]
         position_qty: isize,
@@ -103,10 +100,8 @@ pub enum AlpacaMessage {
         deleted_at: Option<String>,
         status: String,
         currency: String,
-        #[serde(deserialize_with = "from_str")]
-        cash: f64,
-        #[serde(deserialize_with = "from_str")]
-        cash_withdrawable: f64,
+        cash: Decimal,
+        cash_withdrawable: Decimal,
     },
 }
 
