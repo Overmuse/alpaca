@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum AccountStatus {
     Onboarding,
@@ -17,7 +17,7 @@ pub enum AccountStatus {
     Rejected,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Account {
     id: Uuid,
     account_number: String,
@@ -45,6 +45,7 @@ pub struct Account {
     regt_buying_power: Decimal,
 }
 
+#[derive(Clone, Debug)]
 pub struct GetAccount;
 
 impl Request for GetAccount {

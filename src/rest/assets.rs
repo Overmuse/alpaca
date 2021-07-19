@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum AssetClass {
@@ -15,7 +15,7 @@ impl Default for AssetClass {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Exchange {
     Amex,
@@ -27,7 +27,7 @@ pub enum Exchange {
     Otc,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Active,
@@ -39,7 +39,7 @@ impl Default for Status {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Asset {
     id: Uuid,
     class: AssetClass,
@@ -52,7 +52,7 @@ pub struct Asset {
     easy_to_borrow: bool,
 }
 
-#[derive(Serialize, Default)]
+#[derive(Serialize, Default, Clone, Debug)]
 pub struct GetAssets {
     status: Status,
     asset_class: AssetClass,
@@ -76,7 +76,7 @@ impl Request for GetAssets {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct GetAsset<'a>(&'a str);
 
 impl Request for GetAsset<'_> {

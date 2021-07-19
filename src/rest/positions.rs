@@ -18,7 +18,7 @@ impl Default for Side {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Position {
     pub asset_id: Uuid,
     pub symbol: String,
@@ -42,6 +42,7 @@ pub struct Position {
     pub change_today: Decimal,
 }
 
+#[derive(Clone, Debug)]
 pub struct GetPositions;
 impl Request for GetPositions {
     type Body = ();
@@ -52,6 +53,7 @@ impl Request for GetPositions {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct GetPosition<'a>(pub &'a str);
 impl Request for GetPosition<'_> {
     type Body = ();
@@ -62,6 +64,7 @@ impl Request for GetPosition<'_> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct CloseAllPositions;
 impl Request for CloseAllPositions {
     type Body = ();
@@ -73,6 +76,7 @@ impl Request for CloseAllPositions {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct ClosePosition<'a>(pub &'a str);
 impl Request for ClosePosition<'_> {
     type Body = ();
