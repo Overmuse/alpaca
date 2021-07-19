@@ -107,7 +107,7 @@ impl OrderIntent {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum QueryOrderStatus {
     Open,
@@ -120,7 +120,7 @@ impl Default for QueryOrderStatus {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub enum Sort {
     #[serde(rename = "asc")]
     Ascending,
@@ -133,7 +133,7 @@ impl Default for Sort {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct GetOrders {
     status: QueryOrderStatus,
     limit: u16,
@@ -175,7 +175,7 @@ impl Request for GetOrders {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct GetOrder<'a> {
     #[serde(skip)]
     pub order_id: &'a str,
@@ -202,6 +202,7 @@ impl Request for GetOrder<'_> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct SubmitOrder(pub OrderIntent);
 impl Request for SubmitOrder {
     type Body = OrderIntent;
@@ -217,6 +218,7 @@ impl Request for SubmitOrder {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct ReplaceOrder<'a>(pub &'a str, pub OrderIntent);
 impl Request for ReplaceOrder<'_> {
     type Body = OrderIntent;
@@ -232,6 +234,7 @@ impl Request for ReplaceOrder<'_> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct EmptyResponse;
 impl<'de> Deserialize<'de> for EmptyResponse {
     fn deserialize<D>(_deserializer: D) -> Result<EmptyResponse, D::Error>
@@ -242,6 +245,7 @@ impl<'de> Deserialize<'de> for EmptyResponse {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct CancelOrder<'a>(pub &'a str);
 impl Request for CancelOrder<'_> {
     type Body = ();
@@ -253,13 +257,14 @@ impl Request for CancelOrder<'_> {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CancellationAttempt {
     id: Uuid,
     status: usize,
     body: Order,
 }
 
+#[derive(Clone, Debug)]
 pub struct CancelAllOrders();
 impl Request for CancelAllOrders {
     type Body = ();

@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Clock {
     pub timestamp: DateTime<Utc>,
     pub is_open: bool,
@@ -11,6 +11,7 @@ pub struct Clock {
     pub next_close: DateTime<Utc>,
 }
 
+#[derive(Clone, Debug)]
 pub struct GetClock;
 impl Request for GetClock {
     type Body = ();

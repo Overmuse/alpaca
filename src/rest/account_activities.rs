@@ -6,14 +6,14 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum FillType {
     Fill,
     PartialFill,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename = "snake_case")]
 pub enum Side {
     Buy,
@@ -21,7 +21,7 @@ pub enum Side {
     SellShort,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum Activity {
     TradeActivity {
@@ -57,6 +57,7 @@ pub enum Activity {
     },
 }
 
+#[derive(Clone, Debug)]
 pub struct GetAccountActivities;
 impl Request for GetAccountActivities {
     type Body = ();

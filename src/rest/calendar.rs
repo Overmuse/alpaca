@@ -4,7 +4,7 @@ use chrono::{NaiveDate, NaiveTime};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Calendar {
     pub date: NaiveDate,
     #[serde(deserialize_with = "hm_from_str", serialize_with = "hm_to_string")]
@@ -13,7 +13,7 @@ pub struct Calendar {
     pub close: NaiveTime,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct GetCalendar {
     start: NaiveDate,
     end: NaiveDate,

@@ -3,7 +3,7 @@ use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum DtbpCheck {
     Both,
@@ -16,7 +16,7 @@ impl Default for DtbpCheck {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum TradeConfirmEmail {
     All,
@@ -29,7 +29,7 @@ impl Default for TradeConfirmEmail {
     }
 }
 
-#[derive(Deserialize, Serialize, Default)]
+#[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct AccountConfigurations {
     dtbp_check: DtbpCheck,
     trade_confirm_email: TradeConfirmEmail,
@@ -42,6 +42,7 @@ impl AccountConfigurations {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct GetAccountConfigurations;
 impl Request for GetAccountConfigurations {
     type Body = ();
@@ -52,6 +53,7 @@ impl Request for GetAccountConfigurations {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct PatchAccountConfigurations(AccountConfigurations);
 impl Request for PatchAccountConfigurations {
     type Body = AccountConfigurations;
