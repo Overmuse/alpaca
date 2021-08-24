@@ -41,7 +41,7 @@ impl Request for GetCalendar {
     }
 
     fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(&self)
+        RequestBody::Query(self)
     }
 }
 
