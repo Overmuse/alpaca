@@ -171,7 +171,7 @@ impl Request for GetOrders {
     }
 
     fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(&self)
+        RequestBody::Query(self)
     }
 }
 
@@ -198,7 +198,7 @@ impl Request for GetOrder<'_> {
     }
 
     fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(&self)
+        RequestBody::Query(self)
     }
 }
 

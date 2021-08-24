@@ -72,7 +72,7 @@ impl Request for GetAssets {
     }
 
     fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(&self)
+        RequestBody::Query(self)
     }
 }
 
