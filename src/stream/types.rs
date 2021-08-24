@@ -34,6 +34,14 @@ pub enum Event {
     Fill {
         price: Decimal,
         timestamp: DateTime<Utc>,
+        #[cfg(feature = "fractional-shares")]
+        qty: Option<Decimal>,
+        #[cfg(not(feature = "fractional-shares"))]
+        #[serde(
+            default,
+            deserialize_with = "crate::utils::from_str_optional",
+            serialize_with = "crate::utils::to_string_optional"
+        )]
         qty: Option<isize>,
         #[cfg(feature = "fractional-shares")]
         position_qty: Decimal,
@@ -50,6 +58,14 @@ pub enum Event {
     PartialFill {
         price: Decimal,
         timestamp: DateTime<Utc>,
+        #[cfg(feature = "fractional-shares")]
+        qty: Option<Decimal>,
+        #[cfg(not(feature = "fractional-shares"))]
+        #[serde(
+            default,
+            deserialize_with = "crate::utils::from_str_optional",
+            serialize_with = "crate::utils::to_string_optional"
+        )]
         qty: Option<isize>,
         #[cfg(feature = "fractional-shares")]
         position_qty: Decimal,
