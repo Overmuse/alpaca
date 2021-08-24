@@ -34,6 +34,7 @@ pub enum Event {
     Fill {
         price: Decimal,
         timestamp: DateTime<Utc>,
+        qty: Option<isize>,
         #[cfg(feature = "fractional-shares")]
         position_qty: Decimal,
         #[cfg(not(feature = "fractional-shares"))]
@@ -49,6 +50,7 @@ pub enum Event {
     PartialFill {
         price: Decimal,
         timestamp: DateTime<Utc>,
+        qty: Option<isize>,
         #[cfg(feature = "fractional-shares")]
         position_qty: Decimal,
         #[cfg(not(feature = "fractional-shares"))]
