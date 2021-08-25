@@ -148,7 +148,6 @@ pub struct Order {
     pub asset_id: Uuid,
     pub symbol: String,
     pub asset_class: String,
-    pub notional: Option<Decimal>,
     #[serde(
         deserialize_with = "crate::utils::from_str",
         serialize_with = "crate::utils::to_string"
