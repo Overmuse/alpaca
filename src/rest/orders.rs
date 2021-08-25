@@ -2,7 +2,6 @@ use crate::common::{Order, OrderClass, OrderType, Side, TimeInForce};
 use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
 use reqwest::Method;
-use rust_decimal::Decimal;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -14,20 +13,8 @@ impl Default for OrderType {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub enum AmountSpec {
-    #[serde(rename = "qty")]
-    Quantity(Decimal),
-    #[serde(rename = "notional")]
-    Notional(Decimal),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct OrderIntent {
     pub symbol: String,
-    #[cfg(feature = "fractional-shares")]
-    #[serde(flatten)]
-    pub amount: AmountSpec,
-    #[cfg(not(feature = "fractional-shares"))]
     #[serde(
         deserialize_with = "crate::utils::from_str",
         serialize_with = "crate::utils::to_string"
@@ -46,9 +33,6 @@ impl OrderIntent {
     pub fn new(symbol: &str) -> Self {
         OrderIntent {
             symbol: symbol.to_string(),
-            #[cfg(feature = "fractional-shares")]
-            amount: AmountSpec::Quantity(Decimal::new(1, 0)),
-            #[cfg(not(feature = "fractional-shares"))]
             qty: 1,
             side: Side::Buy,
             order_type: OrderType::Market,
@@ -59,20 +43,8 @@ impl OrderIntent {
         }
     }
 
-    #[cfg(feature = "fractional-shares")]
-    pub fn qty(mut self, qty: Decimal) -> Self {
-        self.amount = AmountSpec::Quantity(qty);
-        self
-    }
-
-    #[cfg(not(feature = "fractional-shares"))]
     pub fn qty(mut self, qty: usize) -> Self {
         self.qty = qty;
-        self
-    }
-    #[cfg(feature = "fractional-shares")]
-    pub fn notional(mut self, notional: Decimal) -> Self {
-        self.amount = AmountSpec::Notional(notional);
         self
     }
 
@@ -302,35 +274,6 @@ mod tests {
         };
     }
 
-    #[cfg(feature = "fractional-shares")]
-    #[test]
-    fn serde() {
-        let json = r#"{
-            "symbol":"AAPL",
-            "notional":"1.23",
-            "side":"buy",
-            "type":"limit",
-            "limit_price":"100",
-            "time_in_force":"gtc",
-            "extended_hours":false,
-            "client_order_id":"TEST",
-            "order_class":{
-                "bracket":{
-                    "take_profit":{
-                        "limit_price":301.0
-                    },
-                    "stop_loss":{
-                        "stop_price":299.0,
-                        "limit_price":298.5
-                    }
-                }
-            }
-        }"#;
-        let deserialized: OrderIntent = serde_json::from_str(json).unwrap();
-        let _serialized = serde_json::to_string(&deserialized).unwrap();
-    }
-
-    #[cfg(not(feature = "fractional-shares"))]
     #[test]
     fn serde() {
         let json = r#"{
@@ -365,40 +308,37 @@ mod tests {
             .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .match_query(Matcher::UrlEncoded("nested".into(), "false".into()))
             .with_body(
-                r#"
-                    {
-			  "id": "904837e3-3b76-47ec-b432-046db621571b",
-			  "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
-			  "created_at": "2018-10-05T05:48:59Z",
-			  "updated_at": "2018-10-05T05:48:59Z",
-			  "submitted_at": "2018-10-05T05:48:59Z",
-			  "filled_at": "2018-10-05T05:48:59Z",
-			  "expired_at": "2018-10-05T05:48:59Z",
-			  "canceled_at": "2018-10-05T05:48:59Z",
-			  "failed_at": "2018-10-05T05:48:59Z",
-			  "replaced_at": "2018-10-05T05:48:59Z",
-			  "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
-			  "replaces": null,
-			  "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
-			  "symbol": "AAPL",
-			  "asset_class": "us_equity",
-                          "notional": null,
-			  "qty": "15.0",
-			  "filled_qty": "0",
-			  "type": "market",
-			  "side": "buy",
-			  "time_in_force": "day",
-			  "limit_price": "107.00",
-			  "stop_price": "106.00",
-			  "filled_avg_price": "106.00",
-			  "status": "accepted",
-			  "extended_hours": false,
-			  "legs": null,
-                          "trail_price": "1.05",
-                          "trail_percent": null,
-                          "hwm": "108.05"
-			}
-                "#,
+                r#"{
+			        "id": "904837e3-3b76-47ec-b432-046db621571b",
+			        "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
+			        "created_at": "2018-10-05T05:48:59Z",
+			        "updated_at": "2018-10-05T05:48:59Z",
+			        "submitted_at": "2018-10-05T05:48:59Z",
+			        "filled_at": "2018-10-05T05:48:59Z",
+			        "expired_at": "2018-10-05T05:48:59Z",
+			        "canceled_at": "2018-10-05T05:48:59Z",
+			        "failed_at": "2018-10-05T05:48:59Z",
+			        "replaced_at": "2018-10-05T05:48:59Z",
+			        "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
+			        "replaces": null,
+			        "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
+			        "symbol": "AAPL",
+			        "asset_class": "us_equity",
+			        "qty": "15",
+			        "filled_qty": "0",
+			        "type": "market",
+			        "side": "buy",
+			        "time_in_force": "day",
+			        "limit_price": "107.00",
+			        "stop_price": "106.00",
+			        "filled_avg_price": "106.00",
+			        "status": "accepted",
+			        "extended_hours": false,
+			        "legs": null,
+                    "trail_price": "1.05",
+                    "trail_percent": null,
+                    "hwm": "108.05"
+			    }"#,
             )
             .create();
         let client = Client::new(
@@ -426,40 +366,37 @@ mod tests {
                 Matcher::UrlEncoded("nested".into(), "false".into()),
             ]))
             .with_body(
-                r#"[
-                    {
-			  "id": "904837e3-3b76-47ec-b432-046db621571b",
-			  "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
-			  "created_at": "2018-10-05T05:48:59Z",
-			  "updated_at": "2018-10-05T05:48:59Z",
-			  "submitted_at": "2018-10-05T05:48:59Z",
-			  "filled_at": "2018-10-05T05:48:59Z",
-			  "expired_at": "2018-10-05T05:48:59Z",
-			  "canceled_at": "2018-10-05T05:48:59Z",
-			  "failed_at": "2018-10-05T05:48:59Z",
-			  "replaced_at": "2018-10-05T05:48:59Z",
-			  "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
-			  "replaces": null,
-			  "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
-			  "symbol": "AAPL",
-			  "asset_class": "us_equity",
-                          "notional": null,
-			  "qty": "15.0",
-			  "filled_qty": "0",
-			  "type": "market",
-			  "side": "buy",
-			  "time_in_force": "day",
-			  "limit_price": "107.00",
-			  "stop_price": "106.00",
-			  "filled_avg_price": "106.00",
-			  "status": "accepted",
-			  "extended_hours": false,
-			  "legs": null,
-                          "trail_price": "1.05",
-                          "trail_percent": null,
-                          "hwm": "108.05"
-			}
-                ]"#,
+                r#"[{
+			        "id": "904837e3-3b76-47ec-b432-046db621571b",
+			        "client_order_id": "904837e3-3b76-47ec-b432-046db621571b",
+			        "created_at": "2018-10-05T05:48:59Z",
+			        "updated_at": "2018-10-05T05:48:59Z",
+			        "submitted_at": "2018-10-05T05:48:59Z",
+			        "filled_at": "2018-10-05T05:48:59Z",
+			        "expired_at": "2018-10-05T05:48:59Z",
+			        "canceled_at": "2018-10-05T05:48:59Z",
+			        "failed_at": "2018-10-05T05:48:59Z",
+			        "replaced_at": "2018-10-05T05:48:59Z",
+			        "replaced_by": "904837e3-3b76-47ec-b432-046db621571b",
+			        "replaces": null,
+			        "asset_id": "904837e3-3b76-47ec-b432-046db621571b",
+			        "symbol": "AAPL",
+			        "asset_class": "us_equity",
+			        "qty": "15",
+			        "filled_qty": "0",
+			        "type": "market",
+			        "side": "buy",
+			        "time_in_force": "day",
+			        "limit_price": "107.00",
+			        "stop_price": "106.00",
+			        "filled_avg_price": "106.00",
+			        "status": "accepted",
+			        "extended_hours": false,
+			        "legs": null,
+                    "trail_price": "1.05",
+                    "trail_percent": null,
+                    "hwm": "108.05"
+                }]"#,
             )
             .create();
         let client = Client::new(

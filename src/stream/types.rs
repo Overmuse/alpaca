@@ -34,18 +34,11 @@ pub enum Event {
     Fill {
         price: Decimal,
         timestamp: DateTime<Utc>,
-        #[cfg(feature = "fractional-shares")]
-        qty: Option<Decimal>,
-        #[cfg(not(feature = "fractional-shares"))]
         #[serde(
-            default,
-            deserialize_with = "crate::utils::from_str_optional",
-            serialize_with = "crate::utils::to_string_optional"
+            deserialize_with = "crate::utils::from_str",
+            serialize_with = "crate::utils::to_string"
         )]
-        qty: Option<isize>,
-        #[cfg(feature = "fractional-shares")]
-        position_qty: Decimal,
-        #[cfg(not(feature = "fractional-shares"))]
+        qty: isize,
         #[serde(
             deserialize_with = "crate::utils::from_str",
             serialize_with = "crate::utils::to_string"
@@ -58,18 +51,11 @@ pub enum Event {
     PartialFill {
         price: Decimal,
         timestamp: DateTime<Utc>,
-        #[cfg(feature = "fractional-shares")]
-        qty: Option<Decimal>,
-        #[cfg(not(feature = "fractional-shares"))]
         #[serde(
-            default,
-            deserialize_with = "crate::utils::from_str_optional",
-            serialize_with = "crate::utils::to_string_optional"
+            deserialize_with = "crate::utils::from_str",
+            serialize_with = "crate::utils::to_string"
         )]
-        qty: Option<isize>,
-        #[cfg(feature = "fractional-shares")]
-        position_qty: Decimal,
-        #[cfg(not(feature = "fractional-shares"))]
+        qty: isize,
         #[serde(
             deserialize_with = "crate::utils::from_str",
             serialize_with = "crate::utils::to_string"
@@ -143,7 +129,7 @@ mod test {
 
     #[test]
     fn serde_order_event() {
-        let json = r#"{"stream":"trade_updates","data":{"event":"fill","price":"179.08","timestamp":"2018-02-28T20:38:22Z","position_qty":"100","order":{"id":"61e69015-8549-4bfd-b9c3-01e75843f47d","client_order_id":"eb9e2aaa-f71a-4f51-b5b4-52a6c565dad4","created_at":"2021-03-16T18:38:01.942282Z","updated_at":"2021-03-16T18:38:01.942282Z","submitted_at":"2021-03-16T18:38:01.937734Z","filled_at":null,"expired_at":null,"canceled_at":null,"failed_at":null,"replaced_at":null,"replaced_by":null,"replaces":null,"asset_id":"b0b6dd9d-8b9b-48a9-ba46-b9d54906e415","symbol":"AAPL","asset_class":"us_equity","notional":"500","qty":null,"filled_qty":"0","filled_avg_price":null,"order_class":"","order_type":"market","type":"market","side":"buy","time_in_force":"day","limit_price":null,"stop_price":null,"status":"accepted","extended_hours":false,"legs":null,"trail_percent":null,"trail_price":null,"hwm":null}}}"#;
+        let json = r#"{"stream":"trade_updates","data":{"event":"fill","price":"179.08","timestamp":"2018-02-28T20:38:22Z","qty":"100","position_qty":"100","order":{"id":"61e69015-8549-4bfd-b9c3-01e75843f47d","client_order_id":"eb9e2aaa-f71a-4f51-b5b4-52a6c565dad4","created_at":"2021-03-16T18:38:01.942282Z","updated_at":"2021-03-16T18:38:01.942282Z","submitted_at":"2021-03-16T18:38:01.937734Z","filled_at":null,"expired_at":null,"canceled_at":null,"failed_at":null,"replaced_at":null,"replaced_by":null,"replaces":null,"asset_id":"b0b6dd9d-8b9b-48a9-ba46-b9d54906e415","symbol":"AAPL","asset_class":"us_equity","qty":"100","filled_qty":"100","filled_avg_price":"179.08","order_class":"","order_type":"market","type":"market","side":"buy","time_in_force":"day","limit_price":null,"stop_price":null,"status":"accepted","extended_hours":false,"legs":null,"trail_percent":null,"trail_price":null,"hwm":null}}}"#;
         let deserialized: AlpacaMessage = serde_json::from_str(json).unwrap();
         let _serialized = serde_json::to_string(&deserialized).unwrap();
     }
