@@ -1,6 +1,6 @@
 [package]
 name = "alpaca"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["RollenRegistratorBot <rollenseb@gmail.com>"]
 edition = "2018"
 
@@ -25,7 +25,6 @@ mockito = "0.30"
 tokio = {version = "1.0", default-features = false, features = ["macros", "rt-multi-thread"]}
 
 [features]
-default = ["rest", "ws", "fractional-shares"]
-fractional-shares = []
+default = ["rest", "ws"]
 rest = ["reqwest"]
 ws = ["tokio-tungstenite", "tokio/net"]
