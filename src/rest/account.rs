@@ -23,6 +23,7 @@ pub struct Account {
     pub account_number: String,
     pub status: AccountStatus,
     pub currency: String,
+    pub cash: Decimal,
     pub pattern_day_trader: bool,
     pub trade_suspended_by_user: bool,
     pub trading_blocked: bool,
