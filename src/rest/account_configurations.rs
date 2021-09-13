@@ -31,10 +31,10 @@ impl Default for TradeConfirmEmail {
 
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
 pub struct AccountConfigurations {
-    dtbp_check: DtbpCheck,
-    trade_confirm_email: TradeConfirmEmail,
-    suspend_trade: bool,
-    no_shorting: bool,
+    pub dtbp_check: DtbpCheck,
+    pub trade_confirm_email: TradeConfirmEmail,
+    pub suspend_trade: bool,
+    pub no_shorting: bool,
 }
 impl AccountConfigurations {
     pub fn new() -> Self {
