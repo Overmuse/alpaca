@@ -107,14 +107,14 @@ impl Default for Sort {
 
 #[derive(Serialize, Clone, Debug)]
 pub struct GetOrders {
-    status: QueryOrderStatus,
-    limit: u16,
+    pub status: QueryOrderStatus,
+    pub limit: u16,
     #[serde(skip_serializing_if = "Option::is_none")]
-    after: Option<DateTime<Utc>>,
+    pub after: Option<DateTime<Utc>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    until: Option<DateTime<Utc>>,
-    direction: Sort,
-    nested: bool,
+    pub until: Option<DateTime<Utc>>,
+    pub direction: Sort,
+    pub nested: bool,
 }
 impl GetOrders {
     pub fn new() -> Self {
@@ -231,9 +231,9 @@ impl Request for CancelOrder<'_> {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CancellationAttempt {
-    id: Uuid,
-    status: usize,
-    body: Order,
+    pub id: Uuid,
+    pub status: usize,
+    pub body: Order,
 }
 
 #[derive(Clone, Debug)]

@@ -15,8 +15,8 @@ pub struct Calendar {
 
 #[derive(Serialize, Clone, Debug)]
 pub struct GetCalendar {
-    start: NaiveDate,
-    end: NaiveDate,
+    pub start: NaiveDate,
+    pub end: NaiveDate,
 }
 impl GetCalendar {
     pub fn new() -> Self {

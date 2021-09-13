@@ -41,21 +41,21 @@ impl Default for Status {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Asset {
-    id: Uuid,
-    class: AssetClass,
-    exchange: Exchange,
-    symbol: String,
-    status: Status,
-    tradable: bool,
-    marginable: bool,
-    shortable: bool,
-    easy_to_borrow: bool,
+    pub id: Uuid,
+    pub class: AssetClass,
+    pub exchange: Exchange,
+    pub symbol: String,
+    pub status: Status,
+    pub tradable: bool,
+    pub marginable: bool,
+    pub shortable: bool,
+    pub easy_to_borrow: bool,
 }
 
 #[derive(Serialize, Default, Clone, Debug)]
 pub struct GetAssets {
-    status: Status,
-    asset_class: AssetClass,
+    pub status: Status,
+    pub asset_class: AssetClass,
 }
 impl GetAssets {
     pub fn new() -> Self {
