@@ -1,4 +1,4 @@
-use crate::{Request, RequestBody};
+use rest_client::{Request, RequestBody};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -91,7 +91,7 @@ impl Request for GetAsset<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::Client;
+    use crate::client_with_url;
     use mockito::{mock, Matcher};
 
     #[test]
@@ -124,14 +124,10 @@ mod test {
 		}"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetAssets::new()).await.unwrap();
+        client.send(&GetAssets::new()).await.unwrap();
     }
 
     #[tokio::test]
@@ -153,13 +149,9 @@ mod test {
 		}"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetAsset("AAPL")).await.unwrap();
+        client.send(&GetAsset("AAPL")).await.unwrap();
     }
 }

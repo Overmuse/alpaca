@@ -1,6 +1,6 @@
 use crate::utils::{hm_from_str, hm_to_string};
-use crate::{Request, RequestBody};
 use chrono::{NaiveDate, NaiveTime};
+use rest_client::{Request, RequestBody};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
@@ -48,7 +48,7 @@ impl Request for GetCalendar {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::Client;
+    use crate::client_with_url;
     use mockito::{mock, Matcher};
 
     #[tokio::test]
@@ -70,13 +70,9 @@ mod test {
 		]"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetCalendar::new()).await.unwrap();
+        client.send(&GetCalendar::new()).await.unwrap();
     }
 }

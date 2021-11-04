@@ -1,5 +1,4 @@
-use crate::{Request, RequestBody};
-use reqwest::Method;
+use rest_client::{Method, Request, RequestBody};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
@@ -72,7 +71,7 @@ impl Request for PatchAccountConfigurations {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::Client;
+    use crate::client_with_url;
     use mockito::mock;
 
     #[tokio::test]
@@ -89,14 +88,10 @@ mod test {
 		}"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetAccountConfigurations).await.unwrap();
+        client.send(&GetAccountConfigurations).await.unwrap();
     }
 
     #[tokio::test]
@@ -114,15 +109,11 @@ mod test {
 		}"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
         client
-            .send(PatchAccountConfigurations(AccountConfigurations::new()))
+            .send(&PatchAccountConfigurations(AccountConfigurations::new()))
             .await
             .unwrap();
     }

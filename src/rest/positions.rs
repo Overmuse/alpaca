@@ -1,5 +1,4 @@
-use crate::Request;
-use reqwest::Method;
+use rest_client::{Method, Request};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -90,7 +89,7 @@ impl Request for ClosePosition<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::Client;
+    use crate::client_with_url;
     use mockito::mock;
 
     #[tokio::test]
@@ -100,14 +99,10 @@ mod test {
             .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .with_body(POSITIONS)
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetPositions).await.unwrap();
+        client.send(&GetPositions).await.unwrap();
     }
 
     #[tokio::test]
@@ -117,14 +112,10 @@ mod test {
             .match_header("apca-api-secret-key", "APCA_API_SECRET_KEY")
             .with_body(POSITION)
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetPosition("AAPL")).await.unwrap();
+        client.send(&GetPosition("AAPL")).await.unwrap();
     }
 
     const POSITION: &'static str = r#"{
