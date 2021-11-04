@@ -1,5 +1,5 @@
-use crate::Request;
 use chrono::{DateTime, Utc};
+use rest_client::Request;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -61,7 +61,7 @@ impl Request for GetAccount {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::Client;
+    use crate::client_with_url;
     use mockito::mock;
 
     #[tokio::test]
@@ -100,13 +100,9 @@ mod test {
 		}"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetAccount).await.unwrap();
+        client.send(&GetAccount).await.unwrap();
     }
 }

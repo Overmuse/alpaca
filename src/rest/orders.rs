@@ -1,7 +1,6 @@
 use crate::common::{Order, OrderClass, OrderType, Side, TimeInForce};
-use crate::{Request, RequestBody};
 use chrono::{DateTime, Utc};
-use reqwest::Method;
+use rest_client::{Method, Request, RequestBody};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
@@ -251,7 +250,7 @@ impl Request for CancelAllOrders {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Client;
+    use crate::client_with_url;
     use mockito::{mock, Matcher};
 
     #[test]
@@ -341,15 +340,11 @@ mod tests {
 			    }"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
         client
-            .send(GetOrder::new("904837e3-3b76-47ec-b432-046db621571b"))
+            .send(&GetOrder::new("904837e3-3b76-47ec-b432-046db621571b"))
             .await
             .unwrap();
     }
@@ -399,14 +394,10 @@ mod tests {
                 }]"#,
             )
             .create();
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
-        client.send(GetOrders::new()).await.unwrap();
+        client.send(&GetOrders::new()).await.unwrap();
     }
 
     #[tokio::test]
@@ -418,15 +409,11 @@ mod tests {
             .with_status(404)
             .create();
 
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
         let res = client
-            .send(GetOrder::new("904837e3-3b76-47ec-b432-046db621571b"))
+            .send(&GetOrder::new("904837e3-3b76-47ec-b432-046db621571b"))
             .await;
 
         assert!(res.is_err())
@@ -473,15 +460,11 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(
-            mockito::server_url(),
-            "APCA_API_KEY_ID".to_string(),
-            "APCA_API_SECRET_KEY".to_string(),
-        )
-        .unwrap();
+        let url = mockito::server_url();
+        let client = client_with_url(&url, "APCA_API_KEY_ID", "APCA_API_SECRET_KEY");
 
         client
-            .send(CancelOrder("904837e3-3b76-47ec-b432-046db621571b"))
+            .send(&CancelOrder("904837e3-3b76-47ec-b432-046db621571b"))
             .await
             .unwrap();
     }
