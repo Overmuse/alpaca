@@ -9,21 +9,21 @@ pub mod clock;
 pub mod orders;
 pub mod positions;
 
-pub fn paper_client<'a>(key: &'static str, secret: &'static str) -> Client<'a> {
+pub fn paper_client(key: &str, secret: &str) -> Client {
     Client::new("https://paper-api.alpaca.markets").header_auth(vec![
         ("apca-api-key-id", key),
         ("apca-api-secret-key", secret),
     ])
 }
 
-pub fn live_client<'a>(key: &'static str, secret: &'static str) -> Client<'a> {
+pub fn live_client(key: &str, secret: &str) -> Client {
     Client::new("https://api.alpaca.markets").header_auth(vec![
         ("apca-api-key-id", key),
         ("apca-api-secret-key", secret),
     ])
 }
 
-pub fn client_with_url<'a>(url: &'a str, key: &'static str, secret: &'static str) -> Client<'a> {
+pub fn client_with_url(url: &str, key: &str, secret: &str) -> Client {
     Client::new(url).header_auth(vec![
         ("apca-api-key-id", key),
         ("apca-api-secret-key", secret),

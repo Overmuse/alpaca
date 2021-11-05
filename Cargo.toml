@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 chrono = {version = "0.4", features = ["serde"]}
 futures = "0.3"
-rest-client = {git = "ssh://git@github.com/Overmuse/rest-client.git", tag = "v0.1.1", optional = true}
+rest-client = {git = "ssh://git@github.com/Overmuse/rest-client.git", tag = "v0.1.2", optional = true}
 rust_decimal = "1.14"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0"
