@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
-use rest_client::Request;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+use vila::Request;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Clock {
@@ -14,7 +14,7 @@ pub struct Clock {
 #[derive(Clone, Debug)]
 pub struct GetClock;
 impl Request for GetClock {
-    type Body = ();
+    type Data = ();
     type Response = Clock;
 
     fn endpoint(&self) -> Cow<str> {

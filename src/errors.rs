@@ -10,7 +10,7 @@ pub enum Error {
 
     #[cfg(feature = "rest")]
     #[error(transparent)]
-    RestClient(#[from] rest_client::Error),
+    Vila(#[from] vila::Error),
 
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),

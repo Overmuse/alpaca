@@ -1,10 +1,10 @@
 use crate::utils::*;
 use chrono::{DateTime, Utc};
-use rest_client::Request;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
+use vila::Request;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -60,7 +60,7 @@ pub enum Activity {
 #[derive(Clone, Debug)]
 pub struct GetAccountActivities;
 impl Request for GetAccountActivities {
-    type Body = ();
+    type Data = ();
     type Response = Vec<Activity>;
 
     fn endpoint(&self) -> Cow<str> {

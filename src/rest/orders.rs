@@ -1,9 +1,9 @@
 use crate::common::{Order, OrderClass, OrderType, Side, TimeInForce};
 use chrono::{DateTime, Utc};
-use rest_client::{Method, Request, RequestBody};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
+use vila::{Method, Request, RequestData};
 
 impl Default for OrderType {
     fn default() -> Self {
@@ -134,15 +134,15 @@ impl Default for GetOrders {
 }
 
 impl Request for GetOrders {
-    type Body = Self;
+    type Data = Self;
     type Response = Vec<Order>;
 
     fn endpoint(&self) -> Cow<str> {
         "orders".into()
     }
 
-    fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(self)
+    fn data(&self) -> RequestData<&Self> {
+        RequestData::Query(self)
     }
 }
 
@@ -161,22 +161,22 @@ impl<'a> GetOrder<'a> {
     }
 }
 impl Request for GetOrder<'_> {
-    type Body = Self;
+    type Data = Self;
     type Response = Order;
 
     fn endpoint(&self) -> Cow<str> {
         format!("orders/{}", self.order_id).into()
     }
 
-    fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(self)
+    fn data(&self) -> RequestData<&Self> {
+        RequestData::Query(self)
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct SubmitOrder(pub OrderIntent);
 impl Request for SubmitOrder {
-    type Body = OrderIntent;
+    type Data = OrderIntent;
     type Response = Order;
     const METHOD: Method = Method::POST;
 
@@ -184,15 +184,15 @@ impl Request for SubmitOrder {
         "orders".into()
     }
 
-    fn body(&self) -> RequestBody<&OrderIntent> {
-        RequestBody::Json(&self.0)
+    fn data(&self) -> RequestData<&OrderIntent> {
+        RequestData::Json(&self.0)
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct ReplaceOrder<'a>(pub &'a str, pub OrderIntent);
 impl Request for ReplaceOrder<'_> {
-    type Body = OrderIntent;
+    type Data = OrderIntent;
     type Response = Order;
     const METHOD: Method = Method::POST;
 
@@ -200,8 +200,8 @@ impl Request for ReplaceOrder<'_> {
         format!("orders/{}", self.0).into()
     }
 
-    fn body(&self) -> RequestBody<&OrderIntent> {
-        RequestBody::Json(&self.1)
+    fn data(&self) -> RequestData<&OrderIntent> {
+        RequestData::Json(&self.1)
     }
 }
 
@@ -219,7 +219,7 @@ impl<'de> Deserialize<'de> for EmptyResponse {
 #[derive(Clone, Debug)]
 pub struct CancelOrder<'a>(pub &'a str);
 impl Request for CancelOrder<'_> {
-    type Body = ();
+    type Data = ();
     type Response = EmptyResponse;
     const METHOD: Method = Method::DELETE;
 
@@ -238,7 +238,7 @@ pub struct CancellationAttempt {
 #[derive(Clone, Debug)]
 pub struct CancelAllOrders();
 impl Request for CancelAllOrders {
-    type Body = ();
+    type Data = ();
     type Response = Vec<Order>;
     const METHOD: Method = Method::DELETE;
 
