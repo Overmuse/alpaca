@@ -1,8 +1,8 @@
 use crate::utils::{hm_from_str, hm_to_string};
 use chrono::{NaiveDate, NaiveTime};
-use rest_client::{Request, RequestBody};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+use vila::{Request, RequestData};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Calendar {
@@ -33,15 +33,15 @@ impl Default for GetCalendar {
 }
 
 impl Request for GetCalendar {
-    type Body = Self;
+    type Data = Self;
     type Response = Vec<Calendar>;
 
     fn endpoint(&self) -> Cow<str> {
         "calendar".into()
     }
 
-    fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(self)
+    fn data(&self) -> RequestData<&Self> {
+        RequestData::Query(self)
     }
 }
 

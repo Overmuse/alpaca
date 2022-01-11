@@ -1,9 +1,9 @@
 use chrono::{DateTime, Utc};
-use rest_client::Request;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
+use vila::Request;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -50,7 +50,7 @@ pub struct Account {
 pub struct GetAccount;
 
 impl Request for GetAccount {
-    type Body = ();
+    type Data = ();
     type Response = Account;
 
     fn endpoint(&self) -> Cow<str> {

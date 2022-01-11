@@ -1,8 +1,8 @@
-use rest_client::{Method, Request};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
+use vila::{Method, Request};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all(serialize = "lowercase", deserialize = "lowercase"))]
@@ -44,7 +44,7 @@ pub struct Position {
 #[derive(Clone, Debug)]
 pub struct GetPositions;
 impl Request for GetPositions {
-    type Body = ();
+    type Data = ();
     type Response = Vec<Position>;
 
     fn endpoint(&self) -> Cow<str> {
@@ -55,7 +55,7 @@ impl Request for GetPositions {
 #[derive(Clone, Debug)]
 pub struct GetPosition<'a>(pub &'a str);
 impl Request for GetPosition<'_> {
-    type Body = ();
+    type Data = ();
     type Response = Position;
 
     fn endpoint(&self) -> Cow<str> {
@@ -66,7 +66,7 @@ impl Request for GetPosition<'_> {
 #[derive(Clone, Debug)]
 pub struct CloseAllPositions;
 impl Request for CloseAllPositions {
-    type Body = ();
+    type Data = ();
     type Response = Vec<Position>;
     const METHOD: Method = Method::DELETE;
 
@@ -78,7 +78,7 @@ impl Request for CloseAllPositions {
 #[derive(Clone, Debug)]
 pub struct ClosePosition<'a>(pub &'a str);
 impl Request for ClosePosition<'_> {
-    type Body = ();
+    type Data = ();
     type Response = Position;
 
     fn endpoint(&self) -> Cow<str> {

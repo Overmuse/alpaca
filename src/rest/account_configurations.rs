@@ -1,6 +1,6 @@
-use rest_client::{Method, Request, RequestBody};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+use vila::{Method, Request, RequestData};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
@@ -44,7 +44,7 @@ impl AccountConfigurations {
 #[derive(Clone, Debug)]
 pub struct GetAccountConfigurations;
 impl Request for GetAccountConfigurations {
-    type Body = ();
+    type Data = ();
     type Response = AccountConfigurations;
 
     fn endpoint(&self) -> Cow<str> {
@@ -55,7 +55,7 @@ impl Request for GetAccountConfigurations {
 #[derive(Clone, Debug)]
 pub struct PatchAccountConfigurations(AccountConfigurations);
 impl Request for PatchAccountConfigurations {
-    type Body = AccountConfigurations;
+    type Data = AccountConfigurations;
     type Response = AccountConfigurations;
     const METHOD: Method = Method::PATCH;
 
@@ -63,8 +63,8 @@ impl Request for PatchAccountConfigurations {
         "account/configurations".into()
     }
 
-    fn body(&self) -> RequestBody<&AccountConfigurations> {
-        RequestBody::Json(&self.0)
+    fn data(&self) -> RequestData<&AccountConfigurations> {
+        RequestData::Json(&self.0)
     }
 }
 

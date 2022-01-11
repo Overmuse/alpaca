@@ -1,7 +1,7 @@
-use rest_client::{Request, RequestBody};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
+use vila::{Request, RequestData};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -64,15 +64,15 @@ impl GetAssets {
 }
 
 impl Request for GetAssets {
-    type Body = Self;
+    type Data = Self;
     type Response = Asset;
 
     fn endpoint(&self) -> Cow<str> {
         "assets".into()
     }
 
-    fn body(&self) -> RequestBody<&Self> {
-        RequestBody::Query(self)
+    fn data(&self) -> RequestData<&Self> {
+        RequestData::Query(self)
     }
 }
 
@@ -80,7 +80,7 @@ impl Request for GetAssets {
 pub struct GetAsset<'a>(&'a str);
 
 impl Request for GetAsset<'_> {
-    type Body = ();
+    type Data = ();
     type Response = Asset;
 
     fn endpoint(&self) -> Cow<str> {
